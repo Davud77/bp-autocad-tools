@@ -57,7 +57,7 @@ public class Smoke
             }
             var commandCount = typeof(BotPlusAutocadTool.App).Assembly.GetTypes()
                 .SelectMany(type => type.GetMethods()).SelectMany(method => method.GetCustomAttributes(typeof(CommandMethodAttribute), false)).Count();
-            if (commandCount != 24) throw new InvalidOperationException("Missing commands: " + commandCount);
+            if (commandCount != 77) throw new InvalidOperationException("Missing commands: " + commandCount);
             using (var library = new Database(false, true))
             {
                 library.ReadDwgFile(FormatInsertService.TemplatePath, FileOpenMode.OpenForReadAndAllShare, true, null);
@@ -97,8 +97,8 @@ public class Smoke
                     stamp.LoadValues();
                     stamp.НаименованиеОбъекта = value;
                     stamp.UpdateCommand.Execute(null);
-                    if (stampService.Properties.GetValue("Наименование_объекта1").Length > 64 || stampService.Properties.GetValue("Наименование_объекта2").Length > 64)
-                        throw new InvalidOperationException("Stamp part exceeded 64 characters");
+                    if (stampService.Properties.GetValue("Наименование_объекта") != value)
+                        throw new InvalidOperationException("Canonical stamp field lost content");
                     stamp.LoadValues();
                     if (stamp.НаименованиеОбъекта != value) throw new InvalidOperationException("Stamp round-trip failed at " + length);
                 }
@@ -107,7 +107,8 @@ public class Smoke
             WorkflowChecks.Run();
             DomainChecks.Run(AcadApp.DocumentManager.MdiActiveDocument);
             FeatureChecks.Run(editor);
-            editor.WriteMessage("\nBOTPLUS_SMOKE_PASS: 24 commands; expanded domain checks and WPF window layout.\n");
+            ImportedWindowChecks.Run();
+            editor.WriteMessage("\nBOTPLUS_SMOKE_PASS: 77 commands; expanded domain checks and WPF window layout.\n");
         }
         catch (System.Exception ex)
         {

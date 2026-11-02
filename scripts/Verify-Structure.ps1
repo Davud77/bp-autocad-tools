@@ -14,7 +14,7 @@ foreach ($match in [regex]::Matches($app, 'new ButtonDefinition\("[^"]+", "([^"]
     if (!(Test-Path -LiteralPath (Join-Path $root ('Resources\' + $match.Groups[1].Value)))) { throw 'Missing ribbon icon.' }
     if ($match.Groups[2].Value -notin $commands) { throw 'Ribbon references an unregistered command.' }
 }
-if ([regex]::Matches($app, 'new ButtonDefinition\(').Count -ne 19) { throw 'Unexpected ribbon button count.' }
+if ([regex]::Matches($app, 'new ButtonDefinition\(').Count -ne 24) { throw 'Unexpected ribbon button count.' }
 $vm = [IO.File]::ReadAllText((Join-Path $root 'ViewModels\StampPropsViewModel.cs'))
 $xaml = [IO.File]::ReadAllText((Join-Path $root 'Views\StampPropsControl.xaml'))
 foreach ($match in [regex]::Matches($xaml, 'FieldsMap\[([^\]]+)\]')) {

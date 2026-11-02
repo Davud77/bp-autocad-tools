@@ -19,6 +19,8 @@ namespace BotPlusAutocadTool.Commands
             var selected = editor.GetEntity(options);
             return selected.Status == PromptStatus.OK ? selected.ObjectId : ObjectId.Null;
         }
+        [CommandMethod("ATEXPORTEXCEL", CommandFlags.Modal)]
+        [CommandMethod("АТЭКСПОРТЭКСЕЛЬ", CommandFlags.Modal)]
         [CommandMethod("BOTPLUS_EXPORTEXCEL", CommandFlags.Modal)]
         public void Export()
         {
@@ -41,6 +43,8 @@ namespace BotPlusAutocadTool.Commands
             }
             catch (System.Exception ex) { PluginLog.Error("Export XLSX", ex); doc.Editor.WriteMessage("\nНе удалось экспортировать таблицу: " + ex.Message); }
         }
+        [CommandMethod("ATIMPORTEXCEL", CommandFlags.Modal)]
+        [CommandMethod("АТИМПОРТЭКСЕЛЬ", CommandFlags.Modal)]
         [CommandMethod("BOTPLUS_IMPORTEXCEL", CommandFlags.Modal)]
         public void Import()
         {

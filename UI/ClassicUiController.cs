@@ -13,33 +13,51 @@ namespace BotPlusAutocadTool.UI
     /// <summary>Desktop ActiveX menus/toolbars share the ribbon command catalog.</summary>
     internal sealed class ClassicUiController : IDisposable
     {
+        internal static string UiName => CommandCatalog.TabTitle + " 1.8";
         private dynamic _menu, _toolbar;
         private string _workspace;
         private bool? _ribbonVisible;
         private bool _forceVisible;
+        private string _disabledWorkspace;
         internal void Show()
         {
             _forceVisible = true; _workspace = null;
             EnsureCreated();
             AcadApp.SetSystemVariable("MENUBAR", 1);
         }
+        internal void RemoveIfPresent()
+        {
+            if (!Process.GetCurrentProcess().ProcessName.Equals("acad", StringComparison.OrdinalIgnoreCase)) return;
+            string workspace = AcadApp.GetSystemVariable("WSCURRENT")?.ToString() ?? "";
+            if (_disabledWorkspace == workspace && _menu == null && _toolbar == null) return;
+            dynamic app = AcadApp.AcadApplication;
+            dynamic group = app.MenuGroups.Item(0);
+            _menu ??= Find(group.Menus, UiName);
+            _toolbar ??= Find(group.Toolbars, UiName);
+            if (_menu != null || _toolbar != null) Dispose();
+            HideLegacy(group);
+            _disabledWorkspace = workspace;
+        }
         internal void EnsureCreated()
         {
+            _disabledWorkspace = null;
             if (!Process.GetCurrentProcess().ProcessName.Equals("acad", StringComparison.OrdinalIgnoreCase)) return;
             string workspace = AcadApp.GetSystemVariable("WSCURRENT")?.ToString() ?? "";
             bool ribbonVisible = Autodesk.Windows.ComponentManager.Ribbon?.IsVisible == true;
             if (_menu != null && _toolbar != null && _workspace == workspace && _ribbonVisible == ribbonVisible) return;
             dynamic app = AcadApp.AcadApplication;
             dynamic group = app.MenuGroups.Item(0);
-            _menu = Find(group.Menus, CommandCatalog.TabTitle);
+            HideLegacy(group);
+            _menu = Find(group.Menus, UiName);
             bool populateMenu = _menu == null || !MenuMatches(_menu);
             if (_menu == null)
             {
-                _menu = group.Menus.Add(CommandCatalog.TabTitle);
+                _menu = group.Menus.Add(UiName);
             }
             if (populateMenu)
             {
-                ClearMenu(_menu);
+                // Keep CUI definitions while hidden: deleting live ActiveX objects can invalidate native UI callbacks.
+                if ((int)_menu.Count != 0) throw new InvalidOperationException("Классическое меню изменено. Используйте ленту или восстановите меню " + UiName + " в CUI.");
                 foreach (var panel in CommandCatalog.Panels)
                 {
                     dynamic submenu = _menu.AddSubMenu(_menu.Count, panel.Title);
@@ -48,12 +66,13 @@ namespace BotPlusAutocadTool.UI
                 }
             }
             if (!(bool)_menu.OnMenuBar) _menu.InsertInMenuBar(app.MenuBar.Count);
-            _toolbar = Find(group.Toolbars, CommandCatalog.TabTitle);
+            _toolbar = Find(group.Toolbars, UiName);
             int expectedCount = CommandCatalog.Panels.Sum(panel => panel.Buttons.Length) + CommandCatalog.Panels.Length - 1;
-            if (_toolbar != null && (int)_toolbar.Count != expectedCount) { _toolbar.Delete(); _toolbar = null; }
+            if (_toolbar != null && (int)_toolbar.Count != expectedCount)
+            { _toolbar.Visible = false; throw new InvalidOperationException("Классическая панель изменена. Используйте ленту или восстановите панель " + UiName + " в CUI."); }
             if (_toolbar == null)
             {
-                _toolbar = group.Toolbars.Add(CommandCatalog.TabTitle);
+                _toolbar = group.Toolbars.Add(UiName);
                 _toolbar.Visible = true;
                 foreach (var panel in CommandCatalog.Panels)
                 {
@@ -69,6 +88,13 @@ namespace BotPlusAutocadTool.UI
             }
             _toolbar.Visible = _forceVisible || !ribbonVisible;
             _workspace = workspace; _ribbonVisible = ribbonVisible;
+        }
+        private static void HideLegacy(dynamic group)
+        {
+            dynamic legacyMenu = Find(group.Menus, CommandCatalog.TabTitle);
+            if (legacyMenu != null && (bool)legacyMenu.OnMenuBar) legacyMenu.RemoveFromMenuBar();
+            dynamic legacyToolbar = Find(group.Toolbars, CommandCatalog.TabTitle);
+            if (legacyToolbar != null) legacyToolbar.Visible = false;
         }
         private static bool MenuMatches(dynamic menu)
         {
@@ -91,10 +117,6 @@ namespace BotPlusAutocadTool.UI
             }
             return null;
         }
-        private static void ClearMenu(dynamic menu)
-        {
-            for (int i = (int)menu.Count - 1; i >= 0; i--) menu.Item(i).Delete();
-        }
         internal static string Caption(string title) => title.Replace("\n", " ").Replace("Мульти- копирование", "Мультикопирование");
         internal static string Macro(string command) => "^C^C" + command + " ";
         private static string GetBitmap(string icon)
@@ -103,14 +125,14 @@ namespace BotPlusAutocadTool.UI
             Directory.CreateDirectory(directory);
             string path = Path.Combine(directory, Path.ChangeExtension(icon, ".bmp"));
             if (File.Exists(path)) return path;
-            var source = new BitmapImage(new Uri("pack://application:,,,/BotPlusAutocadTool;component/Resources/" + icon));
+            var source = new BitmapImage(new Uri("pack://application:,,,/" + typeof(ClassicUiController).Assembly.GetName().Name + ";component/Resources/" + icon));
             var encoder = new BmpBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(source));
             using var stream = File.Create(path); encoder.Save(stream);
             return path;
         }
         public void Dispose()
         {
-            try { if (_toolbar != null) _toolbar.Delete(); }
+            try { if (_toolbar != null) _toolbar.Visible = false; }
             finally
             {
                 _toolbar = null;
@@ -119,10 +141,10 @@ namespace BotPlusAutocadTool.UI
                     if (_menu != null)
                     {
                         if ((bool)_menu.OnMenuBar) _menu.RemoveFromMenuBar();
-                        ClearMenu(_menu);
+                        // AutoCAD retains hidden CUI definitions until its native UI can release them.
                     }
                 }
-                finally { _menu = null; _workspace = null; _ribbonVisible = null; }
+                finally { _menu = null; _workspace = null; _ribbonVisible = null; _forceVisible = false; }
             }
         }
     }

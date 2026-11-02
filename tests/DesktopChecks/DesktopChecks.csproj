@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
- <PropertyGroup><TargetFramework>net8.0-windows</TargetFramework><PlatformTarget>x64</PlatformTarget><UseWPF>true</UseWPF><UseWindowsForms>true</UseWindowsForms><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
+ <PropertyGroup><DefineConstants>$(DefineConstants);BOTPLUS_DESKTOP_PREVIEW</DefineConstants><AutoCADVersion Condition="'$(AutoCADVersion)' == ''">2026</AutoCADVersion><TargetFramework Condition="'$(AutoCADVersion)' == '2027'">net10.0-windows</TargetFramework><TargetFramework Condition="'$(AutoCADVersion)' != '2027'">net8.0-windows</TargetFramework><PlatformTarget>x64</PlatformTarget><UseWPF>true</UseWPF><UseWindowsForms>true</UseWindowsForms><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
  <ItemGroup>
   <Compile Include="../../UI/ClassicUiController.cs" Link="ClassicUiController.cs"/><Compile Include="../../UI/CommandCatalog.cs" Link="CommandCatalog.cs"/>
   <Compile Include="../../UI/RibbonController.cs" Link="RibbonController.cs"/>
   <Resource Include="../../Resources/*.png" Link="Resources/%(Filename)%(Extension)" />
-  <Reference Include="AcCoreMgd"><HintPath>C:/Program Files/Autodesk/AutoCAD 2026/accoremgd.dll</HintPath><Private>false</Private></Reference>
-  <Reference Include="AcDbMgd"><HintPath>C:/Program Files/Autodesk/AutoCAD 2026/acdbmgd.dll</HintPath><Private>false</Private></Reference>
-  <Reference Include="AcMgd"><HintPath>C:/Program Files/Autodesk/AutoCAD 2026/acmgd.dll</HintPath><Private>false</Private></Reference>
-  <Reference Include="AdWindows"><HintPath>C:/Program Files/Autodesk/AutoCAD 2026/AdWindows.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="AcCoreMgd"><HintPath>C:/Program Files/Autodesk/AutoCAD $(AutoCADVersion)/accoremgd.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="AcDbMgd"><HintPath>C:/Program Files/Autodesk/AutoCAD $(AutoCADVersion)/acdbmgd.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="AcMgd"><HintPath>C:/Program Files/Autodesk/AutoCAD $(AutoCADVersion)/acmgd.dll</HintPath><Private>false</Private></Reference>
+  <Reference Include="AdWindows"><HintPath>C:/Program Files/Autodesk/AutoCAD $(AutoCADVersion)/AdWindows.dll</HintPath><Private>false</Private></Reference>
  </ItemGroup>
 </Project>

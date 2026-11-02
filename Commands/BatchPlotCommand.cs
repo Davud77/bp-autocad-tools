@@ -16,6 +16,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public class BatchPlotCommand
     {
+        [CommandMethod("ATPLOT", CommandFlags.Modal)]
+        [CommandMethod("АТПЕЧАТЬ", CommandFlags.Modal)]
         [CommandMethod("WEAM_BATCHPLOT", CommandFlags.Modal)]
         public void Execute()
         {

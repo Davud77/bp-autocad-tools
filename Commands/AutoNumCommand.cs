@@ -34,6 +34,8 @@ namespace BotPlusAutocadTool.Commands
 
         #region Command Entry Point
 
+        [CommandMethod("ATNUM", CommandFlags.UsePickSet | CommandFlags.Modal)]
+        [CommandMethod("АТНУМ", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("AUTONUM", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("НУМ", CommandFlags.UsePickSet | CommandFlags.Modal)]
         public void ExecuteAutoNum()

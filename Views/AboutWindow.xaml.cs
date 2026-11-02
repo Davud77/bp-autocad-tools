@@ -37,9 +37,34 @@ namespace BotPlusAutocadTool.Views
                     { SettingsService.Settings.LastNotifiedUpdateTag = latest.Tag; SettingsService.Save(); }
                     return latest;
                 },
-                (latest, progress, token) => UpdateDownloadService.DownloadAsync(latest,
-                    Path.Combine(PluginPaths.UserDataDirectory, "Updates", latest.Version.ToString()), progress, token), PluginLog.Error);
+                async (latest, progress, token) =>
+                {
+                    string file = await UpdateDownloadService.DownloadAsync(latest,
+                        Path.Combine(PluginPaths.UserDataDirectory, "Updates", latest.Version.ToString()), progress, token);
+                    if (SettingsService.Settings.AutoInstallUpdates && latest.Version > version)
+                    {
+                        var installation = UpdateInstallation.Current();
+                        if (installation == null) QueuedUpdateText.Text = "Для этой ручной сборки запустите скачанный установщик самостоятельно.";
+                        else
+                        {
+                            using var input = File.OpenRead(file);
+                            string hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(input));
+                            UpdateInstallation.CancelPending(SettingsService.Settings.PendingUpdateDirectory);
+                            string queueDirectory = Path.Combine(PluginPaths.UserDataDirectory, "Updates", Guid.NewGuid().ToString("N"));
+                            Directory.CreateDirectory(queueDirectory);
+                            string queuedFile = Path.Combine(queueDirectory, Path.GetFileName(file));
+                            File.Copy(file, queuedFile);
+                            installation.Queue(new PreparedUpdate(queueDirectory, queuedFile, hash, latest.Tag));
+                            SettingsService.Settings.PendingUpdateDirectory = queueDirectory;
+                            SettingsService.Save();
+                            QueuedUpdateText.Text = "Обновление ожидает закрытия всех окон AutoCAD и Core Console. Снимите галочку, чтобы отменить ожидание.";
+                        }
+                    }
+                    return file;
+                }, PluginLog.Error);
             if (release != null) InlineUpdates.Model.PresentRelease(release);
+            if (UpdateInstallation.PendingState(SettingsService.Settings.PendingUpdateDirectory) is string state)
+                QueuedUpdateText.Text = "Состояние отложенной установки: " + state;
             LoadEditor(JsonConvert.DeserializeObject<EditableSettings>(JsonConvert.SerializeObject(SettingsService.Settings)));
             AddHandler(System.Windows.Controls.Primitives.ToggleButton.CheckedEvent, new RoutedEventHandler(SaveCheckbox), true);
             AddHandler(System.Windows.Controls.Primitives.ToggleButton.UncheckedEvent, new RoutedEventHandler(SaveCheckbox), true);
@@ -63,10 +88,12 @@ namespace BotPlusAutocadTool.Views
             if ((bool)property.GetValue(SettingsService.Settings) == value) return;
             property.SetValue(SettingsService.Settings, value);
             SettingsService.Save();
+            if (path == nameof(PluginSettings.AutoInstallUpdates) && !value)
+            { UpdateInstallation.CancelPending(SettingsService.Settings.PendingUpdateDirectory); QueuedUpdateText.Text = "Ожидание установки отменено."; }
             if (path == nameof(PluginSettings.IncludePrereleaseUpdates)) InlineUpdates.Model.ChannelChanged();
         }
 
-        private void OpenProject(object sender, RoutedEventArgs args) => Open("https://github.com/Davud77/BotPlusAutocadTool");
+        private void OpenProject(object sender, RoutedEventArgs args) => Open("https://github.com/Davud77/bp-autocad-tools");
         private void ResetClick(object sender, RoutedEventArgs args) => LoadEditor(new EditableSettings());
         private void BrowseOutputClick(object sender, RoutedEventArgs args)
         {
@@ -103,6 +130,9 @@ namespace BotPlusAutocadTool.Views
             settings.OpenFileAfterPlot = edited.OpenFileAfterPlot;
             settings.ScaleNumerator = edited.ScaleNumerator; settings.ScaleDenominator = edited.ScaleDenominator;
             settings.LengthUnit = edited.LengthUnit; settings.AreaUnit = edited.AreaUnit;
+            settings.EnableClassicUi = edited.EnableClassicUi;
+            settings.AutoInstallUpdates = edited.AutoInstallUpdates;
+            if (!edited.AutoInstallUpdates) UpdateInstallation.CancelPending(settings.PendingUpdateDirectory);
             settings.AutoCheckUpdates = edited.AutoCheckUpdates; settings.IncludePrereleaseUpdates = edited.IncludePrereleaseUpdates;
             if (!SettingsService.TrySave())
             { MessageBox.Show(this, "Не удалось сохранить настройки. Подробности записаны в журнал.", Title); return; }
@@ -118,7 +148,10 @@ namespace BotPlusAutocadTool.Views
         public static void ShowUpdate(ReleaseVersion release)
         {
             if (_active != null) { _active.InlineUpdates.Model.PresentRelease(release); return; }
-            Autodesk.AutoCAD.ApplicationServices.Application.ShowModalWindow(new AboutWindow(release));
+            var window = new AboutWindow(release);
+            if (SettingsService.Settings.AutoInstallUpdates && release.Version > Assembly.GetExecutingAssembly().GetName().Version)
+                window.Loaded += async (_, _) => await window.InlineUpdates.Model.DownloadAsync();
+            Autodesk.AutoCAD.ApplicationServices.Application.ShowModalWindow(window);
         }
         private void CloseWindow(object sender, RoutedEventArgs args) => Close();
         private void OpenLogs(object sender, RoutedEventArgs args)

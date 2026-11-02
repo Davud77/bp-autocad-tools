@@ -18,6 +18,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public class CleanUnselectedCommand
     {
+        [CommandMethod("ATDELETEOTHERS", CommandFlags.UsePickSet | CommandFlags.Modal)]
+        [CommandMethod("АТУДАЛИТЬОСТАЛЬНОЕ", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("CLEANUNSELECTED")]
         public void Execute()
         {

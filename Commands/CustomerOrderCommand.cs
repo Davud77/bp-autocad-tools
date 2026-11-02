@@ -13,6 +13,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public sealed class CustomerOrderCommand
     {
+        [CommandMethod("ATHANDOFF")]
+        [CommandMethod("АТПЕРЕДАЧА")]
         [CommandMethod("WEAM_CUSTOMERORDER")]
         public void Run()
         {

@@ -21,6 +21,8 @@ namespace BotPlusAutocadTool.Commands
         // Статическая ссылка для реализации Singleton (одно окно)
         private static StampWindow _stampWindow;
 
+        [CommandMethod("ATSTAMP", CommandFlags.Session)]
+        [CommandMethod("АТШТАМП", CommandFlags.Session)]
         [CommandMethod("WEAM_STAMP", CommandFlags.Session)]
         // CommandFlags.Session важно для Modeless Window
         public void ShowStampWindow()

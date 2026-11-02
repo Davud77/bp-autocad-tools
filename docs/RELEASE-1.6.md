@@ -6,4 +6,4 @@
 
 Для установки закройте AutoCAD и запустите **BotPlusAutocadTool-1.6-Setup.exe**. ZIP предназначен для ручной установки bundle; SHA-256 находится в приложенном файле контрольных сумм.
 
-[Инструкция 1.6](https://github.com/Davud77/BotPlusAutocadTool/blob/main/docs/USAGE-1.6.md) · [Проверки и ограничения](https://github.com/Davud77/BotPlusAutocadTool/blob/main/docs/VALIDATION.md)
+[Инструкция 1.6](https://github.com/Davud77/bp-autocad-tools/blob/main/docs/USAGE-1.6.md) · [Проверки и ограничения](https://github.com/Davud77/bp-autocad-tools/blob/main/docs/VALIDATION.md)

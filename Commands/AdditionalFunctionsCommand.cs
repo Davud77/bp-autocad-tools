@@ -5,6 +5,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public sealed class AdditionalFunctionsCommand
     {
+        [CommandMethod("ATLIBRARY", CommandFlags.Session)]
+        [CommandMethod("АТБИБЛИОТЕКА", CommandFlags.Session)]
         [CommandMethod("BOTPLUS_ADDITIONAL", CommandFlags.Session)]
         public void Run() => System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
             System.Windows.Threading.DispatcherPriority.ApplicationIdle, new System.Action(UI.AdditionalFunctionsMenu.Show));

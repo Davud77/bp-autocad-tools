@@ -7,9 +7,9 @@ internal static class UpdatePanelChecks
     private static void Expect(bool value, string message) { if (!value) throw new Exception(message); }
     private static ReleaseVersion Release(string version, bool preview = false, bool asset = true) => ReleaseVersion.FindLatest(JsonConvert.SerializeObject(new[] {
         new { tag_name="v"+version, draft=false, prerelease=preview,
-            html_url="https://github.com/Davud77/BotPlusAutocadTool/releases/tag/v"+version,
+            html_url="https://github.com/Davud77/bp-autocad-tools/releases/tag/v"+version,
             assets=asset ? new[] {new { name="BotPlusAutocadTool-"+version+"-Setup.exe", size=100,
-                browser_download_url="https://github.com/Davud77/BotPlusAutocadTool/releases/download/v"+version+"/BotPlusAutocadTool-"+version+"-Setup.exe", digest="sha256:"+new string('a',64)}} : Array.Empty<object>() }
+                browser_download_url="https://github.com/Davud77/bp-autocad-tools/releases/download/v"+version+"/BotPlusAutocadTool-"+version+"-Setup.exe", digest="sha256:"+new string('a',64)}} : Array.Empty<object>() }
     }), true);
 
     internal static async Task Run()

@@ -39,7 +39,7 @@ namespace BotPlusAutocadTool.Services
                 if ((current != null && normalized <= current) || (best != null && normalized <= best.Version)) continue;
                 if (!Uri.TryCreate(release.Value<string>("html_url"), UriKind.Absolute, out var url) ||
                     url.Scheme != "https" || url.Host != "github.com" ||
-                    !url.AbsolutePath.StartsWith("/Davud77/BotPlusAutocadTool/releases/", StringComparison.Ordinal)) continue;
+                    !url.AbsolutePath.StartsWith("/Davud77/bp-autocad-tools/releases/", StringComparison.Ordinal)) continue;
                 best = new ReleaseVersion(normalized, tag, url) { IsPrerelease = release.Value<bool>("prerelease") };
                 string installer = "BotPlusAutocadTool-" + label + "-Setup.exe";
                 string checksums = "SHA256SUMS-" + label + ".txt";
@@ -47,7 +47,7 @@ namespace BotPlusAutocadTool.Services
                 {
                     string name = asset.Value<string>("name");
                     if (name != installer && name != checksums) continue;
-                    var expected = new Uri("https://github.com/Davud77/BotPlusAutocadTool/releases/download/" +
+                    var expected = new Uri("https://github.com/Davud77/bp-autocad-tools/releases/download/" +
                         Uri.EscapeDataString(tag) + "/" + Uri.EscapeDataString(name));
                     if (!Uri.TryCreate(asset.Value<string>("browser_download_url"), UriKind.Absolute, out var download) || download != expected) continue;
                     if (name == checksums) best.ChecksumsUrl = download;

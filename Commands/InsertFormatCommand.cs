@@ -8,6 +8,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public sealed class InsertFormatCommand
     {
+        [CommandMethod("ATFRAME", CommandFlags.Modal)]
+        [CommandMethod("АТРАМКА", CommandFlags.Modal)]
         [CommandMethod("BOTPLUS_INSERTFORMAT", CommandFlags.Modal)]
         public void Run()
         {

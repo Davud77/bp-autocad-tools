@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Derived from Davud77/bp-autocad-tools (51e3e82). See THIRD-PARTY-NOTICES.md.
 using System;
 using System.IO;
 using System.Reflection;
@@ -74,12 +75,13 @@ namespace BotPlusAutocadTool.Services
                 var block = new BlockReference(position, definitionId);
                 block.SetDatabaseDefaults(target);
                 block.LayerId = layerId;
-                var definition = (BlockTableRecord)transaction.GetObject(definitionId, OpenMode.ForRead);
                 var units = BatchPlotService.ResolveDrawingUnits(target, drawingUnitsOverride, Array.Empty<Models.BatchPlotItem>());
-                double definitionMm = definition.Units == UnitsValue.Undefined ? 1 : PlotUnits.Get((int)definition.Units).MillimetersPerUnit;
+                var sourceDefinition = (BlockTableRecord)transaction.GetObject(definitionId, OpenMode.ForRead);
+                double definitionMm = sourceDefinition.Units == UnitsValue.Undefined ? 1 : PlotUnits.Get((int)sourceDefinition.Units).MillimetersPerUnit;
                 block.ScaleFactors = new Scale3d(scale * definitionMm / units.MillimetersPerUnit);
                 var result = space.AppendEntity(block);
                 transaction.AddNewlyCreatedDBObject(block, true);
+                var definition = (BlockTableRecord)transaction.GetObject(definitionId, OpenMode.ForRead);
                 foreach (ObjectId id in definition)
                 {
                     if (!(transaction.GetObject(id, OpenMode.ForRead) is AttributeDefinition attribute) || attribute.Constant) continue;
@@ -108,7 +110,11 @@ namespace BotPlusAutocadTool.Services
                     else if (string.IsNullOrWhiteSpace(reference.TextString) || reference.TextString == "Наименование чертежа") reference.TextString = " ";
                     if (reference.IsMTextAttribute) reference.UpdateMTextAttribute();
                 }
+                StampSignatureDwgService.Synchronize(target);
+                StampTextLayoutService.Apply(target);
                 transaction.Commit();
+                target.EvaluateFields(FieldEvaluationContext.Demand);
+                StampSignatureTracking.Start();
                 return result;
             }
         }

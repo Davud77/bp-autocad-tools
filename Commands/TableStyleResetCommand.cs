@@ -11,6 +11,7 @@ namespace BotPlusAutocadTool.Commands
 {
     public sealed class TableStyleResetCommand
     {
+        [CommandMethod("БПСТИЛЬТАБЛИЦ", CommandFlags.UsePickSet)]
         [CommandMethod("BOTPLUS_CLEARTABLESTYLE", CommandFlags.UsePickSet)]
         public void Run()
         {

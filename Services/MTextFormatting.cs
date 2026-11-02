@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Derived from Davud77/bp-autocad-tools (51e3e82). See THIRD-PARTY-NOTICES.md.
 using System;
 using System.Text;
 using System.Globalization;

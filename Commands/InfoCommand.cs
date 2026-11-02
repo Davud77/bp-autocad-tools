@@ -12,6 +12,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public class InfoCommand
     {
+        [CommandMethod("ATINFO")]
+        [CommandMethod("АТИНФО")]
         [CommandMethod("WEAM_INFO")]
         public void Execute()
         {

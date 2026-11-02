@@ -16,7 +16,11 @@ namespace BotPlusAutocadTool
         private readonly ContextMenuController _contextMenu = new();
         private readonly ClassicUiController _classic = new();
         private static App _instance;
-        internal static void ShowClassicUi() => _instance?._classic.Show();
+        internal static void ShowClassicUi()
+        {
+            if (SettingsService.Settings.EnableClassicUi) _instance?._classic.Show();
+            else AcadApp.ShowModalWindow(new Views.AboutWindow());
+        }
         private DateTime _nextUiCheckUtc;
         private bool _initialized;
         private bool _plotterInstalled;
@@ -38,6 +42,7 @@ namespace BotPlusAutocadTool
             AcadApp.Idle -= OnIdle;
             RunSafely("Stop updates", UpdateCheckService.Stop);
             RunSafely("Stop selection indicator", SelectionLengthService.Stop);
+            RunSafely("Stop stamp tracking", StampSignatureTracking.Stop);
             RunSafely("Stop publication", DsdPublishService.Shutdown);
             RunSafely("Stop Excel sessions", TableExcelService.Shutdown);
             RunSafely("Stop copy restrictions", CopyProtectionService.Shutdown);
@@ -66,7 +71,8 @@ namespace BotPlusAutocadTool
             {
                 _ribbon.EnsureCreated();
                 _contextMenu.EnsureCreated();
-                _classic.EnsureCreated();
+                if (SettingsService.Settings.EnableClassicUi) _classic.EnsureCreated();
+                else _classic.RemoveIfPresent();
             }
             catch (System.Exception ex)
             {

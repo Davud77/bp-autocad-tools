@@ -1,17 +1,19 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// See LICENSE in the repository root.
 // ============================================================================
 // OOXGN - Copyright (c) 2026. All rights reserved.
 // Author: OOXGN | Project: BotPlusAutocadTool
-// SPDX-License-Identifier: AGPL-3.0-only
 // ============================================================================
 
 // File: BotPlusAutocadTool/Views/StampWindow.xaml.cs
 using System.Windows;
 using System;
-using System.Linq;
 using System.IO;
 using BotPlusAutocadTool.Models;
 using BotPlusAutocadTool.Services;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using System.Linq;
+using System.Windows.Controls;
 
 namespace BotPlusAutocadTool.Views
 {
@@ -20,9 +22,17 @@ namespace BotPlusAutocadTool.Views
         public StampWindow(ViewModels.StampPropsViewModel viewModel)
         {
             InitializeComponent();
+            UiTheme.Apply(this);
             DataContext = viewModel;
         }
 
+        private void Signature_Click(object sender, RoutedEventArgs e)
+        {
+            var viewModel = (ViewModels.StampPropsViewModel)DataContext;
+            var key = (sender as Button)?.Tag as string ?? "Signer1";
+            var dialog = new SignatureWindow(viewModel.Signatures.Values.ToArray(), key) { Owner = this };
+            if (dialog.ShowDialog() == true) viewModel.Signatures[dialog.SlotKey].Signature = dialog.Result;
+        }
         private void WriteDrawing(object sender, RoutedEventArgs args)
         {
             var targets = AcadApp.DocumentManager.Cast<Autodesk.AutoCAD.ApplicationServices.Document>()

@@ -6,12 +6,12 @@ using Newtonsoft.Json;
 internal static class DownloadChecks
 {
     private const string Name = "BotPlusAutocadTool-1.4-Setup.exe";
-    private const string Base = "https://github.com/Davud77/BotPlusAutocadTool/releases/download/v1.4/";
+    private const string Base = "https://github.com/Davud77/bp-autocad-tools/releases/download/v1.4/";
     private static readonly byte[] Payload = Enumerable.Range(0, 200000).Select(i => (byte)i).ToArray();
     private static string Digest => Convert.ToHexString(SHA256.HashData(Payload)).ToLowerInvariant();
     private static ReleaseVersion Release(string digest, long? size = null, string installerUrl = null, string checksumUrl = null) => ReleaseVersion.FindUpdate(
         JsonConvert.SerializeObject(new[] { new { tag_name = "v1.4", draft = false, prerelease = false,
-            html_url = "https://github.com/Davud77/BotPlusAutocadTool/releases/tag/v1.4", assets = new[] {
+            html_url = "https://github.com/Davud77/bp-autocad-tools/releases/tag/v1.4", assets = new[] {
                 new { name = Name, browser_download_url = installerUrl ?? Base + Name, size = size ?? Payload.Length, digest },
                 new { name = "SHA256SUMS-1.4.txt", browser_download_url = checksumUrl ?? Base + "SHA256SUMS-1.4.txt", size = 100L, digest = (string)null }
             } } }), new Version(1,3,3));

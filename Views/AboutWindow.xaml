@@ -36,11 +36,17 @@
                     <StackPanel>
                         <views:UpdatePanel x:Name="InlineUpdates"/>
                         <CheckBox x:Name="AutoUpdateCheck" Content="Проверять обновления автоматически" IsChecked="{Binding AutoCheckUpdates}"/>
+                        <CheckBox Content="Устанавливать скачанное обновление после закрытия AutoCAD" IsChecked="{Binding AutoInstallUpdates}"/>
+                        <TextBlock x:Name="QueuedUpdateText" TextWrapping="Wrap"/>
                         <CheckBox x:Name="PrereleaseUpdateCheck" Content="Включать предварительные выпуски" IsChecked="{Binding IncludePrereleaseUpdates}"/>
                         <TextBlock Text="При запуске AutoCAD и затем раз в сутки. Установка — по вашему выбору." Foreground="{DynamicResource TextPrimary}" FontSize="12" TextWrapping="Wrap" Margin="0,10,0,2"/>
                     </StackPanel>
                 </GroupBox>
                 <StackPanel Grid.Row="3" x:Name="SettingsSection">
+                    <GroupBox Header="Интерфейс"><StackPanel>
+                        <CheckBox x:Name="ClassicUiCheck" Content="Загружать классическое меню и панель" IsChecked="{Binding EnableClassicUi}"/>
+                        <TextBlock Text="По умолчанию выключено. Меню и панель загружаются только при включённой галочке, в том числе при скрытой ленте." TextWrapping="Wrap"/>
+                    </StackPanel></GroupBox>
                     <GroupBox Header="Форматка">
                         <StackPanel>
                             <TextBlock Text="Масштаб вставки WM_FORMAT"/>

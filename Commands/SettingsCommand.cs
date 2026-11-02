@@ -5,6 +5,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public sealed class SettingsCommand
     {
+        [CommandMethod("ATSETTINGS", CommandFlags.Modal)]
+        [CommandMethod("АТНАСТРОЙКИ", CommandFlags.Modal)]
         [CommandMethod("BOTPLUS_SETTINGS", CommandFlags.Modal)]
         public void Run() => AcadApp.ShowModalWindow(new Views.SettingsWindow());
     }

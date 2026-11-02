@@ -16,6 +16,8 @@ namespace BotPlusAutocadTool.Commands
 
         public static void CloseWindow() => _window?.Close();
 
+        [CommandMethod("ATSUM", CommandFlags.UsePickSet | CommandFlags.Modal)]
+        [CommandMethod("АТСУММА", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("SUMLENGTH")]
         public void ShowWindow()
         {

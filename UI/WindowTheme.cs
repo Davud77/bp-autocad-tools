@@ -35,6 +35,9 @@ namespace BotPlusAutocadTool.UI
                 if (window.Resources[keys[i]] is SolidColorBrush existing && existing.Color == color) continue;
                 var brush = new SolidColorBrush(color); brush.Freeze(); window.Resources[keys[i]] = brush;
             }
+            window.Resources["InputBackground"] = window.Resources["ControlBackground"];
+            window.Resources["Divider"] = window.Resources["ControlBorder"];
+            window.Resources["DisabledText"] = window.Resources["TextSecondary"];
             var handle = new WindowInteropHelper(window).Handle;
             if (handle != IntPtr.Zero)
             {

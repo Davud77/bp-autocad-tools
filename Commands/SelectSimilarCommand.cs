@@ -21,6 +21,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public class SelectSimilarCommand
     {
+        [CommandMethod("ATSIMILAR", CommandFlags.UsePickSet | CommandFlags.Modal | CommandFlags.Redraw)]
+        [CommandMethod("АТПОДОБНЫЕ", CommandFlags.UsePickSet | CommandFlags.Modal | CommandFlags.Redraw)]
         [CommandMethod("WSELECT")]
         public void Execute()
         {

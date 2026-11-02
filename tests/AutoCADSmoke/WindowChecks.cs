@@ -15,7 +15,7 @@ internal static class WindowChecks
     {
         var factories = new Func<Window>[]
         {
-            () => new AboutWindow(), () => new UpdateDownloadWindow(ReleaseVersion.FindUpdate("[{\"tag_name\":\"v1.4\",\"html_url\":\"https://github.com/Davud77/BotPlusAutocadTool/releases/tag/v1.4\"}]", new Version(1,3,3))),
+            () => new AboutWindow(), () => new UpdateDownloadWindow(ReleaseVersion.FindUpdate("[{\"tag_name\":\"v1.4\",\"html_url\":\"https://github.com/Davud77/bp-autocad-tools/releases/tag/v1.4\"}]", new Version(1,3,3))),
             () => new AutoNumSettingsWindow(new AutoNumSettingsViewModel()),
             () => new CleanDwgWindow(), () => new CustomerOrderWindow(), () => new PlanPrepWindow(),
             () => new SelectSimilarWindow(), () => new StripTextWindow(), () => new SumLengthWindow { DataContext = new SumLengthViewModel() },

@@ -81,6 +81,9 @@ namespace BotPlusAutocadTool.Services
 
     public class PluginSettings
     {
+        public bool AutoInstallUpdates { get; set; } = false;
+        public string PendingUpdateDirectory { get; set; }
+        public bool EnableClassicUi { get; set; } = false;
         public bool AutoCheckUpdates { get; set; } = true;
         public bool IncludePrereleaseUpdates { get; set; } = false;
         public DateTime LastUpdateCheckUtc { get; set; }

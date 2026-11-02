@@ -198,6 +198,11 @@ namespace BotPlusAutocadTool.ViewModels
                 SettingsService.Save();
             }
         }
+        public bool KeepExistingPdfFiles
+        {
+            get => SettingsService.Settings.KeepExistingPdfFiles;
+            set { SettingsService.Settings.KeepExistingPdfFiles = value; SettingsService.Save(); OnPropertyChanged(); }
+        }
         public int PlotScaleIndex
         {
             get => _service.PlotScale == 100 ? 1 : 0;

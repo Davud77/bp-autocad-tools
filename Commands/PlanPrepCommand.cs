@@ -19,6 +19,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public class PlanPrepCommand
     {
+        [CommandMethod("ATPLAN", CommandFlags.UsePickSet | CommandFlags.Modal)]
+        [CommandMethod("АТПЛАН", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("PLANPREP")]
         public void Execute()
         {

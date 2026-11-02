@@ -51,7 +51,7 @@ namespace BotPlusAutocadTool.Services
 
         private static async Task<ReleaseVersion> FetchRelease(bool prerelease, CancellationToken token, bool latest)
         {
-            using (var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/Davud77/BotPlusAutocadTool/releases?per_page=30"))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/Davud77/bp-autocad-tools/releases?per_page=30"))
             {
                 request.Headers.UserAgent.ParseAdd("BotPlusAutocadTool/" + Assembly.GetExecutingAssembly().GetName().Version);
                 request.Headers.Accept.ParseAdd("application/vnd.github+json");

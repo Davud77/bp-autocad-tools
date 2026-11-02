@@ -1,0 +1,49 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-only; see LICENSE in the repository root. -->
+<!-- ========================================================================
+     OOXGN - Copyright (c) 2026. All rights reserved.
+     Author: OOXGN | Project: BotPlusAutocadTool
+     ======================================================================== -->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:BotPlusAutocadTool.Views" x:Class="BotPlusAutocadTool.Views.AlignSkewWindow" mc:Ignorable="d" Title="Аксонометрия" SizeToContent="Height" Width="440" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Style="{DynamicResource ToolWindow}">
+    <!-- Подключаем ресурсы (Конвертер) -->
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <local:InverseBooleanConverter x:Key="InverseBoolConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
+            <!-- Блок 1: Режим -->
+            <GroupBox Header="Режим работы">
+                <StackPanel>
+                    <RadioButton Content="Полный набор функций" IsChecked="{Binding IsFullFunction}"/>
+                    <RadioButton Content="Только наклон (Аксонометрия)" IsChecked="{Binding IsFullFunction, Converter={StaticResource InverseBoolConverter}}"/>
+                </StackPanel>
+            </GroupBox>
+            <!-- Блок 2: Опции -->
+            <GroupBox Header="Настройки обработки">
+                <StackPanel>
+                    <CheckBox Content="С сохранением свойств текста" IsChecked="{Binding PreserveTextProperties}"/>
+                    <CheckBox Content="Предварительно расчленить размеры" IsChecked="{Binding ExplodeDimensions}"/>
+                    <CheckBox Content="Предварительно расчленить выноски" IsChecked="{Binding ExplodeLeaders}"/>
+                </StackPanel>
+            </GroupBox>
+            <!-- Блок 3: Блоки -->
+            <GroupBox Header="Обработка блоков">
+                <StackPanel>
+                    <RadioButton Content="Предварительно расчленить блоки" IsChecked="{Binding IsBlockExplode}"/>
+                    <RadioButton Content="Переместить блоки (без искажения)" IsChecked="{Binding IsBlockMove}"/>
+                    <RadioButton Content="Без обработки" IsChecked="{Binding IsBlockNone}"/>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+        <!-- Кнопка Выполнить -->
+        <Button Grid.Row="1" Content="Выполнить" Style="{StaticResource PrimaryButton}" Command="{Binding RunCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Height="35" Margin="0,10,0,0" FontWeight="Bold"/>
+    </Grid>
+</Window>

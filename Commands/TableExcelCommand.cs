@@ -12,6 +12,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public sealed class TableExcelCommand
     {
+        [CommandMethod("ATEXCEL", CommandFlags.UsePickSet | CommandFlags.Modal)]
+        [CommandMethod("АТЭКСЕЛЬ", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("WEAM_TABLEEXCEL")]
         public void Run()
         {

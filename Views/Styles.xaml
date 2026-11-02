@@ -45,4 +45,11 @@
     <Style TargetType="CheckBox"><Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/><Setter Property="Margin" Value="0,5"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="ContentTemplate"><Setter.Value><DataTemplate><TextBlock Text="{Binding}" TextWrapping="Wrap"/></DataTemplate></Setter.Value></Setter></Style>
     <Style TargetType="GroupBox"><Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/><Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}"/><Setter Property="Padding" Value="10"/><Setter Property="Margin" Value="0,0,0,12"/></Style>
     <Style TargetType="DataGrid"><Setter Property="Background" Value="{DynamicResource WindowBackground}"/><Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/><Setter Property="RowBackground" Value="{DynamicResource ControlBackground}"/><Setter Property="AlternatingRowBackground" Value="{DynamicResource WindowBackground}"/><Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}"/><Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource ControlBorder}"/></Style>
+    <SolidColorBrush x:Key="InputBackground" Color="#303A47"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="#F5A090"/>
+    <SolidColorBrush x:Key="Divider" Color="#606B7C"/>
+    <SolidColorBrush x:Key="AccentText" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="DisabledText" Color="#BBC4D0"/>
+    <Style x:Key="ToolTextBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}"/>
+    <Style x:Key="ToolWindow" TargetType="Window"><Setter Property="Background" Value="{DynamicResource WindowBackground}"/><Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="FontSize" Value="13"/></Style>
 </ResourceDictionary>

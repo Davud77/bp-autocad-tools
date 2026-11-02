@@ -24,6 +24,16 @@ namespace BotPlusAutocadTool.UI
             if (ReferenceEquals(_ribbon, ribbon) && ReferenceEquals(ribbon.FindTab(CommandCatalog.TabId), _tab) && _tab?.Panels.Count == CommandCatalog.Panels.Length)
                 return;
 
+            var tab = BuildTab();
+            var previous = ribbon.FindTab(CommandCatalog.TabId);
+            if (previous != null) ribbon.Tabs.Remove(previous);
+            ribbon.Tabs.Add(tab);
+            _ribbon = ribbon;
+            _tab = tab;
+        }
+
+        internal RibbonTab BuildTab()
+        {
             // Build before attaching: a missing resource cannot leave a half-built tab.
             var tab = new RibbonTab { Id = CommandCatalog.TabId, Name = CommandCatalog.TabTitle, Title = CommandCatalog.TabTitle };
             foreach (var definition in CommandCatalog.Panels)
@@ -44,11 +54,7 @@ namespace BotPlusAutocadTool.UI
                     });
                 tab.Panels.Add(new RibbonPanel { Source = source });
             }
-            var previous = ribbon.FindTab(CommandCatalog.TabId);
-            if (previous != null) ribbon.Tabs.Remove(previous);
-            ribbon.Tabs.Add(tab);
-            _ribbon = ribbon;
-            _tab = tab;
+            return tab;
         }
 
         private ImageSource GetIcon(string name)

@@ -5,7 +5,7 @@
     <TargetFramework Condition="'$(AutoCADVersion)' == '2025' Or '$(AutoCADVersion)' == '2026'">net8.0-windows</TargetFramework>
     <AssemblyName>BotPlusAutocadTool</AssemblyName>
     <RootNamespace>BotPlusAutocadTool</RootNamespace>
-    <Version>1.7.1</Version>
+    <Version>1.8.0</Version>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
     <UseWPF>true</UseWPF>
@@ -43,6 +43,7 @@
     <Reference Include="AdWindows"><HintPath>$(AutoCADPath)\AdWindows.dll</HintPath><Private>False</Private></Reference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Assets/UpdateRunner.ps1" LogicalName="BotPlusAutocadTool.UpdateRunner.ps1"/>
     <None Remove="Resources\**\*.png" />
     <None Update="Assets\WM_FORMAT.dwg" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Update="Assets\botplus.dwt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

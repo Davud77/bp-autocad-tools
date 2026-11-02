@@ -5,6 +5,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public sealed class CheckUpdatesCommand
     {
+        [CommandMethod("ATUPDATE")]
+        [CommandMethod("АТОБНОВЛЕНИЯ")]
         [CommandMethod("BOTPLUS_CHECKUPDATES")]
         public void Run() => UpdateCheckService.Check(true);
     }

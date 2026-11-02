@@ -14,6 +14,11 @@ foreach ($framework in @('net8.0','net10.0')) {
 }
 dotnet run --project (Join-Path $root 'tests\PdfChecks\PdfChecks.csproj') -c Release
 if ($LASTEXITCODE -ne 0) { throw 'PDF processing checks failed.' }
+foreach ($check in @('CommandChecks','NumberedCopyTextChecks','MultiCopyLayoutChecks')) {
+    dotnet run --project (Join-Path $root "tests/$check/$check.csproj") -c Release -- $root
+    if ($LASTEXITCODE -ne 0) { throw "Feature checks failed: $check" }
+}
+& (Join-Path $root 'tests/UpdateRunnerChecks/Run.ps1')
 if ($Native) {
     & (Join-Path $PSScriptRoot 'Test-AutoCAD.ps1') -Year $Year -Label candidate
     & (Join-Path $PSScriptRoot 'Test-AutoCAD.ps1') -Year $Year -Plot -Label candidate-pdf

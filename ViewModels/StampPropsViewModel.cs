@@ -1,7 +1,8 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// See LICENSE in the repository root.
 // ============================================================================
 // OOXGN - Copyright (c) 2026. All rights reserved.
 // Author: OOXGN | Project: BotPlusAutocadTool
-// SPDX-License-Identifier: AGPL-3.0-only
 // ============================================================================
 
 // File: BotPlusAutocadTool/ViewModels/StampPropsViewModel.cs
@@ -14,12 +15,13 @@ using BotPlusAutocadTool.Services;
 
 namespace BotPlusAutocadTool.ViewModels
 {
-    public class StampPropsViewModel : BaseViewModel
+    public partial class StampPropsViewModel : BaseViewModel
     {
         private readonly IAutoCADService _autoCADService;
 
-        // Максимальная длина одной части поля (ограничение AutoCAD Sheet Set Manager — 64 символа)
+        // Only used when reading legacy fields that were split into two parts.
         private const int MaxFieldPartLength = 64;
+        public StampTypography Typography { get; private set; } = new StampTypography();
 
         // Словарь для быстрого Binding: Text="{Binding FieldsMap[Key].Value}"
         private Dictionary<string, StampField> _fieldsMap;
@@ -35,21 +37,21 @@ namespace BotPlusAutocadTool.ViewModels
         public string ОбозначениеДокумента
         {
             get => _обозначениеДокумента;
-            set => SetProperty(ref _обозначениеДокумента, StampField.NormalizeEdit(_обозначениеДокумента, value));
+            set => SetProperty(ref _обозначениеДокумента, value);
         }
 
         private string _наименованиеОбъекта;
         public string НаименованиеОбъекта
         {
             get => _наименованиеОбъекта;
-            set => SetProperty(ref _наименованиеОбъекта, StampField.NormalizeEdit(_наименованиеОбъекта, value));
+            set => SetProperty(ref _наименованиеОбъекта, value);
         }
 
         private string _наименованиеУчастка;
         public string НаименованиеУчастка
         {
             get => _наименованиеУчастка;
-            set => SetProperty(ref _наименованиеУчастка, StampField.NormalizeEdit(_наименованиеУчастка, value));
+            set => SetProperty(ref _наименованиеУчастка, value);
         }
 
         public RelayCommand UpdateCommand { get; }
@@ -67,6 +69,8 @@ namespace BotPlusAutocadTool.ViewModels
         public void LoadValues()
         {
             var properties = _autoCADService.LoadStampProperties();
+            Typography = (_autoCADService as IStampTypographyService)?.LoadTypography() ?? new StampTypography();
+            OnPropertyChanged(nameof(Typography));
 
             // Список всех возможных ключей штампа (кроме объединяемых)
             var keys = new[]
@@ -93,63 +97,29 @@ namespace BotPlusAutocadTool.ViewModels
                 newMap[key] = new StampField(key, val);
             }
 
-            // Объединяем парные поля в одно для отображения в UI
-            ОбозначениеДокумента = MergeFields(
-                properties.GetValue("Обозначение_документа1"),
-                properties.GetValue("Обозначение_документа2"));
-
-            НаименованиеОбъекта = MergeFields(
-                properties.GetValue("Наименование_объекта1"),
-                properties.GetValue("Наименование_объекта2"));
-
-            НаименованиеУчастка = MergeFields(
-                properties.GetValue("Наименование_участка1"),
-                properties.GetValue("Наименование_участка2"));
-
+            ОбозначениеДокумента = ReadText(properties, "Обозначение_документа");
+            НаименованиеОбъекта = ReadText(properties, "Наименование_объекта");
+            НаименованиеУчастка = ReadText(properties, "Наименование_участка");
             FieldsMap = newMap;
+            LoadSignatures();
         }
 
         private void ExecuteUpdate(object parameter)
         {
-            try { _autoCADService.SaveStampProperties(CaptureValues()); }
-            catch (ArgumentException ex) { System.Windows.MessageBox.Show(ex.Message, "BotPlus AT"); }
-        }
-
-        public StampProperties CaptureValues(bool empty = false)
-        {
-            if (empty)
-            {
-                var blank = new StampProperties();
-                foreach (var key in StampSchema.Keys) blank.SetValue(key, " ");
-                return blank;
-            }
             if (new[] { ОбозначениеДокумента, НаименованиеОбъекта, НаименованиеУчастка }
-                .Any(value => (value?.Trim().Length ?? 0) > MaxFieldPartLength * 2))
+                .Any(value => (value?.Trim().Length ?? 0) > 1000))
             {
-                throw new ArgumentException("Значение поля штампа не должно превышать 128 символов.");
+                System.Windows.MessageBox.Show("Значение поля штампа не должно превышать 1000 символов.", "Autocad Tools");
+                return;
             }
-            var properties = new StampProperties();
-
-            // Собираем данные из словаря
-            foreach (var field in FieldsMap.Values)
+            var properties = CaptureValues();
+            try
             {
-                properties.SetValue(field.Key, string.IsNullOrWhiteSpace(field.Value) ? " " : field.Value.Trim());
+                if (_autoCADService is IStampSignatureService signatureService)
+                    signatureService.SaveStamp(properties, Signatures.Where(s => s.Value.Signature != null).ToDictionary(s => s.Key, s => s.Value.Signature));
+                else _autoCADService.SaveStampProperties(properties);
             }
-
-            // Разбиваем объединённые поля обратно на части
-            var (doc1, doc2) = SplitField(ОбозначениеДокумента);
-            properties.SetValue("Обозначение_документа1", doc1);
-            properties.SetValue("Обозначение_документа2", doc2);
-
-            var (obj1, obj2) = SplitField(НаименованиеОбъекта);
-            properties.SetValue("Наименование_объекта1", obj1);
-            properties.SetValue("Наименование_объекта2", obj2);
-
-            var (part1, part2) = SplitField(НаименованиеУчастка);
-            properties.SetValue("Наименование_участка1", part1);
-            properties.SetValue("Наименование_участка2", part2);
-
-            return properties;
+            catch (Exception ex) { System.Windows.MessageBox.Show("Не удалось применить штамп: " + ex.Message, "Свойства штампа"); }
         }
 
         /// <summary>
@@ -166,25 +136,43 @@ namespace BotPlusAutocadTool.ViewModels
             return part1.Trim() + " " + part2.Trim();
         }
 
-        private (string part1, string part2) SplitField(string value)
+        public StampProperties CaptureValues(bool empty = false)
         {
-            if (string.IsNullOrWhiteSpace(value)) return (" ", " ");
-            value = value.Trim();
-            if (value.Length > MaxFieldPartLength * 2)
-                throw new ArgumentException("Значение поля превышает 128 символов.", nameof(value));
-            if (value.Length <= MaxFieldPartLength) return (value, " ");
-            int minimum = value.Length - MaxFieldPartLength;
-            int middle = value.Length / 2;
-            int split = MaxFieldPartLength;
-            for (int offset = 0; offset <= MaxFieldPartLength; offset++)
+            if (empty)
             {
-                int right = middle + offset;
-                int left = middle - offset;
-                if (right >= minimum && right <= MaxFieldPartLength && char.IsWhiteSpace(value[right - 1])) { split = right; break; }
-                if (left >= minimum && left <= MaxFieldPartLength && char.IsWhiteSpace(value[left - 1])) { split = left; break; }
+                var blank = new StampProperties();
+                foreach (var key in StampSchema.Keys) blank.SetValue(key, " ");
+                return blank;
             }
-            // Keep whitespace in the first part so a save/reload preserves the exact value.
-            return (value.Substring(0, split), value.Substring(split));
+            if (new[] { ОбозначениеДокумента, НаименованиеОбъекта, НаименованиеУчастка }.Any(value => (value?.Trim().Length ?? 0) > 1000))
+                throw new ArgumentException("Значение поля штампа не должно превышать 1000 символов.");
+            var properties = new StampProperties();
+
+            // Собираем данные из словаря
+            foreach (var field in FieldsMap.Values)
+            {
+                properties.SetValue(field.Key, field.Value);
+            }
+
+            WriteText(properties, "Обозначение_документа", ОбозначениеДокумента);
+            WriteText(properties, "Наименование_объекта", НаименованиеОбъекта);
+            WriteText(properties, "Наименование_участка", НаименованиеУчастка);
+            return properties;
+        }
+
+        private string ReadText(StampProperties properties, string key)
+        {
+            return properties.Properties.TryGetValue(key, out var value) ? value?.Trim() ?? ""
+                : MergeFields(properties.GetValue(key + "1"), properties.GetValue(key + "2"));
+        }
+
+        private static void WriteText(StampProperties properties, string key, string value)
+        {
+            value = string.IsNullOrWhiteSpace(value) ? " " : value.Trim();
+            properties.SetValue(key, value);
+            // Existing DWG fields can still reference these aliases; no text is split or truncated.
+            properties.SetValue(key + "1", value);
+            properties.SetValue(key + "2", " ");
         }
     }
 }

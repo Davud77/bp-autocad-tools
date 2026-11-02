@@ -38,7 +38,7 @@ internal static class ServiceWindowChecks
                 "Product description is not beside BotPlus AT");
             var panel = (UpdatePanel)window.FindName("InlineUpdates");
             panel.Model.Dispose();
-            var release = ReleaseVersion.FindLatest("[{\"tag_name\":\"v1.7.1\",\"html_url\":\"https://github.com/Davud77/BotPlusAutocadTool/releases/tag/v1.7.1\",\"assets\":[{\"name\":\"BotPlusAutocadTool-1.7.1-Setup.exe\",\"browser_download_url\":\"https://github.com/Davud77/BotPlusAutocadTool/releases/download/v1.7.1/BotPlusAutocadTool-1.7.1-Setup.exe\"}]}]");
+            var release = ReleaseVersion.FindLatest("[{\"tag_name\":\"v1.7.1\",\"html_url\":\"https://github.com/Davud77/bp-autocad-tools/releases/tag/v1.7.1\",\"assets\":[{\"name\":\"BotPlusAutocadTool-1.7.1-Setup.exe\",\"browser_download_url\":\"https://github.com/Davud77/bp-autocad-tools/releases/download/v1.7.1/BotPlusAutocadTool-1.7.1-Setup.exe\"}]}]");
             panel.Model = new UpdatePanelViewModel(new Version(1,7,1), () => false,
                 (_, _) => Task.FromResult(release), (_, _, _) => Task.FromResult(@"C:\Updates\BotPlusAutocadTool-1.7.1-Setup.exe"));
             panel.Model.CheckAsync().GetAwaiter().GetResult(); root.UpdateLayout();
@@ -51,8 +51,11 @@ internal static class ServiceWindowChecks
                 "Downloaded installer path is not available in service window");
             var settings = (StackPanel)window.FindName("SettingsSection");
             Check(Grid.GetRow(settings) > Grid.GetRow(updates), "Settings are not below Updates");
-            Check(settings.Children.OfType<GroupBox>().Select(group => group.Header.ToString()).SequenceEqual(new[] { "Форматка", "Пакетная печать", "Сумма длин" }), "Missing service settings groups");
+            Check(settings.Children.OfType<GroupBox>().Select(group => group.Header.ToString()).SequenceEqual(new[] { "Интерфейс", "Форматка", "Пакетная печать", "Сумма длин" }), "Missing service settings groups");
             Check(!nodes.OfType<Button>().Any(button => Equals(button.Content, "Настройки")), "Extra settings button survived");
+            var classic = (CheckBox)window.FindName("ClassicUiCheck");
+            classic.SetCurrentValue(ToggleButton.IsCheckedProperty, !saved.EnableClassicUi);
+            Check(SettingsService.Settings.EnableClassicUi == !saved.EnableClassicUi, "Classic checkbox not saved immediately");
             var auto = (CheckBox)window.FindName("AutoUpdateCheck");
             auto.SetCurrentValue(ToggleButton.IsCheckedProperty, !saved.AutoCheckUpdates);
             Check(SettingsService.Settings.AutoCheckUpdates == !saved.AutoCheckUpdates, "Update checkbox not saved immediately");
@@ -63,7 +66,7 @@ internal static class ServiceWindowChecks
             nodes.OfType<Button>().Single(button => Equals(button.Content, "Сохранить")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             var actual = JsonConvert.DeserializeObject<PluginSettings>(File.ReadAllText(Path.Combine(PluginPaths.UserDataDirectory, "settings.json")));
             Check(actual.FrameInsertionScale == 17 && actual.PlotScale == 100 && actual.ScaleNumerator == 2 && actual.ScaleDenominator == 3 &&
-                actual.LengthUnit == 1 && actual.AreaUnit == 2 && actual.PlotTransparency && actual.KeepExistingPdfFiles && actual.AutoCheckUpdates == !saved.AutoCheckUpdates,
+                actual.EnableClassicUi == !saved.EnableClassicUi && actual.LengthUnit == 1 && actual.AreaUnit == 2 && actual.PlotTransparency && actual.KeepExistingPdfFiles && actual.AutoCheckUpdates == !saved.AutoCheckUpdates,
                 "Integrated settings were not saved");
             var legacy = new SettingsWindow();
             Check(legacy.FindName("SettingsSection") != null && ((AboutWindow.EditableSettings)legacy.DataContext).FrameInsertionScale == 17,

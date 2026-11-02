@@ -17,6 +17,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public class CleanDwgCommand
     {
+        [CommandMethod("ATCLEAN")]
+        [CommandMethod("АТОЧИСТКА")]
         [CommandMethod("CLEANDWG")]
         public void Execute()
         {

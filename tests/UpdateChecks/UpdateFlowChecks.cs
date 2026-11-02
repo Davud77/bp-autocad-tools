@@ -8,7 +8,7 @@ internal static class UpdateFlowChecks
     private static readonly BindingFlags PrivateStatic = BindingFlags.NonPublic | BindingFlags.Static;
     private static FieldInfo Field(string name) => typeof(UpdateCheckService).GetField(name, PrivateStatic)!;
     private static Task<ReleaseVersion> Pending => (Task<ReleaseVersion>)Field("_pending").GetValue(null);
-    private static readonly ReleaseVersion Update = ReleaseVersion.FindUpdate("[{\"tag_name\":\"v1.3.1\",\"draft\":false,\"prerelease\":false,\"html_url\":\"https://github.com/Davud77/BotPlusAutocadTool/releases/tag/v1.3.1\"}]", new Version(1,2,1));
+    private static readonly ReleaseVersion Update = ReleaseVersion.FindUpdate("[{\"tag_name\":\"v1.3.1\",\"draft\":false,\"prerelease\":false,\"html_url\":\"https://github.com/Davud77/bp-autocad-tools/releases/tag/v1.3.1\"}]", new Version(1,2,1));
     private static void Seed(Task<ReleaseVersion> task)
     {
         ((UpdateSchedule)Field("Schedule").GetValue(null)!).Checked(DateTime.UtcNow);

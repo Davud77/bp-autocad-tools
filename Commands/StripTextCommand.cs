@@ -21,6 +21,8 @@ namespace BotPlusAutocadTool.Commands
 {
     public class StripTextCommand
     {
+        [CommandMethod("ATTEXTRESET", CommandFlags.UsePickSet | CommandFlags.Modal)]
+        [CommandMethod("АТСБРОСТЕКСТА", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("STRIPTEXT")]
         public void Execute()
         {

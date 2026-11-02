@@ -61,7 +61,7 @@
 
 Закройте AutoCAD и запустите `BotPlusAutocadTool-1.3.1-Setup.exe`. Установщик удаляет зарегистрированную прежнюю версию в выбранном режиме и устанавливает новый bundle; настройки сохраняются. Папка `ExcelRuntime` обязательна — не переносите только одну DLL.
 
-Проверки и их границы: [VALIDATION.md](VALIDATION.md). Готовые установщики и исходники: [GitHub Releases](https://github.com/Davud77/BotPlusAutocadTool/releases).
+Проверки и их границы: [VALIDATION.md](VALIDATION.md). Готовые установщики и исходники: [GitHub Releases](https://github.com/Davud77/bp-autocad-tools/releases).
 
 ## Нумерация TABLE с полями и формулами
 

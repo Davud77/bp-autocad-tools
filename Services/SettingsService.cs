@@ -44,6 +44,12 @@ namespace BotPlusAutocadTool.Services
                     var json = File.ReadAllText(loadPath);
                     _settings = JsonConvert.DeserializeObject<PluginSettings>(json) ?? new PluginSettings();
                     _settings.Normalize();
+                    if ((Newtonsoft.Json.Linq.JObject.Parse(json).Value<int?>("DefaultsRevision") ?? 0) < 181)
+                    {
+                        _settings.FrameInsertionScale = 100; _settings.PlotScale = 100;
+                        _settings.OpenFolderAfterPlot = true; _settings.PlotInBackground = false;
+                        _settings.DefaultsRevision = 181; SaveCore();
+                    }
                 }
                 else
                 {
@@ -81,6 +87,7 @@ namespace BotPlusAutocadTool.Services
 
     public class PluginSettings
     {
+        public int DefaultsRevision { get; set; } = 181;
         public bool AutoInstallUpdates { get; set; } = false;
         public string PendingUpdateDirectory { get; set; }
         public bool EnableClassicUi { get; set; } = false;
@@ -93,11 +100,11 @@ namespace BotPlusAutocadTool.Services
         public int ScaleDenominator { get; set; } = 1;
         public int LengthUnit { get; set; } = 0; // 0=mm, 1=m, 2=km
         public int AreaUnit { get; set; } = 0;   // 0=mm², 1=m², 2=km²
-        public double FrameInsertionScale { get; set; } = 1;
-        public int PlotScale { get; set; } = 1;
-        public bool PlotInBackground { get; set; } = true;
+        public double FrameInsertionScale { get; set; } = 100;
+        public int PlotScale { get; set; } = 100;
+        public bool PlotInBackground { get; set; } = false;
         public bool PlotTransparency { get; set; }
-        public bool OpenFolderAfterPlot { get; set; }
+        public bool OpenFolderAfterPlot { get; set; } = true;
         public bool OpenFileAfterPlot { get; set; }
         public bool KeepExistingPdfFiles { get; set; }
         public string PlotOutputDirectory { get; set; } = "";
@@ -108,8 +115,8 @@ namespace BotPlusAutocadTool.Services
             ScaleDenominator = Math.Max(1, ScaleDenominator);
             if (LengthUnit < 0 || LengthUnit > 2) LengthUnit = 0;
             if (AreaUnit < 0 || AreaUnit > 2) AreaUnit = 0;
-            if (!double.IsFinite(FrameInsertionScale) || FrameInsertionScale <= 0 || FrameInsertionScale > 1000000) FrameInsertionScale = 1;
-            if (PlotScale != 1 && PlotScale != 100) PlotScale = 1;
+            if (!double.IsFinite(FrameInsertionScale) || FrameInsertionScale <= 0 || FrameInsertionScale > 1000000) FrameInsertionScale = 100;
+            if (PlotScale != 1 && PlotScale != 100) PlotScale = 100;
             PlotOutputDirectory ??= "";
         }
     }

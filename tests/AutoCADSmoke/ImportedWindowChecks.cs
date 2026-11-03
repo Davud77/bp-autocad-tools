@@ -11,6 +11,19 @@ internal static class ImportedWindowChecks
 {
     internal static void Run()
     {
+        foreach (var panel in BotPlusAutocadTool.UI.CommandCatalog.Panels)
+        foreach (var button in panel.Buttons)
+        {
+            string macro = BotPlusAutocadTool.UI.ClassicUiController.Macro(button.Command);
+            if (!macro.StartsWith("\u0003\u0003") || macro.Contains("^C")) throw new InvalidOperationException("Invalid ActiveX macro");
+            foreach (int size in new[] {16,32})
+            {
+                var icon = new BitmapImage(new Uri(BotPlusAutocadTool.UI.ClassicUiController.GetBitmap(button.Icon,size)));
+                if (icon.PixelWidth != size || BitConverter.ToUInt16(File.ReadAllBytes(BotPlusAutocadTool.UI.ClassicUiController.GetBitmap(button.Icon,size)),28) != 24) throw new InvalidOperationException("Invalid BMP");
+                byte[] pixel = new byte[4]; icon.CopyPixels(new Int32Rect(0,0,1,1),pixel,4,0);
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) throw new InvalidOperationException("Black icon background");
+            }
+        }
         string directory = Path.Combine(PluginPaths.UserDataDirectory, "WindowChecks");
         Directory.CreateDirectory(directory);
         string pgp = Path.Combine(directory, "test.pgp");

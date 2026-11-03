@@ -13,7 +13,7 @@ namespace BotPlusAutocadTool.UI
     /// <summary>Desktop ActiveX menus/toolbars share the ribbon command catalog.</summary>
     internal sealed class ClassicUiController : IDisposable
     {
-        internal static string UiName => CommandCatalog.TabTitle + " 1.8";
+        internal static string UiName => CommandCatalog.TabTitle + " 1.8.1";
         private dynamic _menu, _toolbar;
         private string _workspace;
         private bool? _ribbonVisible;
@@ -80,7 +80,7 @@ namespace BotPlusAutocadTool.UI
                     foreach (var button in panel.Buttons)
                     {
                         dynamic item = _toolbar.AddToolbarButton(_toolbar.Count, Caption(button.Title), button.Description, Macro(button.Command));
-                        try { string bitmap = GetBitmap(button.Icon); item.SetBitmaps(bitmap, bitmap); }
+                        try { item.SetBitmaps(GetBitmap(button.Icon, 16), GetBitmap(button.Icon, 32)); }
                         catch (Exception ex) { PluginLog.Error("Classic toolbar icon", ex); }
                     }
                 }
@@ -91,9 +91,14 @@ namespace BotPlusAutocadTool.UI
         }
         private static void HideLegacy(dynamic group)
         {
-            dynamic legacyMenu = Find(group.Menus, CommandCatalog.TabTitle);
+            HideNamed(group, CommandCatalog.TabTitle + " 1.8");
+            HideNamed(group, CommandCatalog.TabTitle);
+        }
+        private static void HideNamed(dynamic group, string name)
+        {
+            dynamic legacyMenu = Find(group.Menus, name);
             if (legacyMenu != null && (bool)legacyMenu.OnMenuBar) legacyMenu.RemoveFromMenuBar();
-            dynamic legacyToolbar = Find(group.Toolbars, CommandCatalog.TabTitle);
+            dynamic legacyToolbar = Find(group.Toolbars, name);
             if (legacyToolbar != null) legacyToolbar.Visible = false;
         }
         private static bool MenuMatches(dynamic menu)
@@ -118,15 +123,26 @@ namespace BotPlusAutocadTool.UI
             return null;
         }
         internal static string Caption(string title) => title.Replace("\n", " ").Replace("Мульти- копирование", "Мультикопирование");
-        internal static string Macro(string command) => "^C^C" + command + " ";
-        private static string GetBitmap(string icon)
+        internal static string Macro(string command) => "\u0003\u0003" + command + "\r";
+        internal static string GetBitmap(string icon, int size)
         {
-            string directory = Path.Combine(PluginPaths.UserDataDirectory, "UI", "1.3.1");
+            bool dark = Convert.ToInt32(AcadApp.GetSystemVariable("COLORTHEME")) == 0;
+            string directory = Path.Combine(PluginPaths.UserDataDirectory, "UI", "1.8.1", dark ? "dark" : "light", size.ToString());
             Directory.CreateDirectory(directory);
             string path = Path.Combine(directory, Path.ChangeExtension(icon, ".bmp"));
             if (File.Exists(path)) return path;
             var source = new BitmapImage(new Uri("pack://application:,,,/" + typeof(ClassicUiController).Assembly.GetName().Name + ";component/Resources/" + icon));
-            var encoder = new BmpBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(source));
+            var visual = new System.Windows.Media.DrawingVisual();
+            using (var draw = visual.RenderOpen())
+            {
+                var background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString(dark ? "#3B4453" : "#ECEFF3");
+                draw.DrawRectangle(background, null, new System.Windows.Rect(0, 0, size, size));
+                draw.DrawImage(source, new System.Windows.Rect(0, 0, size, size));
+            }
+            var bitmap = new RenderTargetBitmap(size, size, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            var opaque = new FormatConvertedBitmap(bitmap, System.Windows.Media.PixelFormats.Bgr24, null, 0);
+            var encoder = new BmpBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(opaque));
             using var stream = File.Create(path); encoder.Save(stream);
             return path;
         }

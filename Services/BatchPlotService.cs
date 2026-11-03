@@ -59,7 +59,7 @@ namespace BotPlusAutocadTool.Services
         public int PlotScale { get; set; } = SettingsService.Settings.PlotScale;
         public int? DrawingUnitsOverride { get; set; }
         public PlotUnitContext DrawingUnits { get; private set; }
-        public PlotSearchOrder SearchOrder { get; set; } = PlotSearchOrder.TopToBottom;
+        public PlotSearchOrder SearchOrder { get; set; } = PlotSearchOrder.LeftToRight;
 
         #endregion
 

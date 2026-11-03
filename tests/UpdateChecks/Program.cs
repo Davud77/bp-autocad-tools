@@ -102,12 +102,13 @@ static void TestSettings(string scenario)
     else if (!settings.AutoCheckUpdates || settings.ScaleNumerator != 1) throw new Exception("Default settings missing");
     if (scenario == "invalid-values" && (settings.ScaleDenominator != 1 || settings.LengthUnit != 0 || settings.AreaUnit != 0))
         throw new Exception("Invalid persisted settings were not normalized");
+    if (settings.FrameInsertionScale != 100 || settings.PlotScale != 100 || settings.PlotInBackground || !settings.OpenFolderAfterPlot) throw new Exception("1.8.1 defaults missing");
     settings.ScaleNumerator = 7;
     if (settings.PlotTransparency) throw new Exception("Legacy transparency default must be off");
     settings.PlotTransparency = true;
     if (settings.KeepExistingPdfFiles) throw new Exception("Legacy settings must keep replacement as the default");
     settings.KeepExistingPdfFiles = true;
-    if (settings.OpenFolderAfterPlot || settings.OpenFileAfterPlot) throw new Exception("New post-print actions changed legacy defaults");
+    if (!settings.OpenFolderAfterPlot || settings.OpenFileAfterPlot) throw new Exception("New post-print defaults incorrect");
     settings.OpenFolderAfterPlot = true; settings.OpenFileAfterPlot = true;
     SettingsService.Save();
     if (scenario != "unavailable")

@@ -24,6 +24,7 @@ namespace BotPlusAutocadTool
         private DateTime _nextUiCheckUtc;
         private bool _initialized;
         private bool _plotterInstalled;
+        private bool _templateChecked;
 
         public void Initialize()
         {
@@ -69,6 +70,15 @@ namespace BotPlusAutocadTool
             }
             try
             {
+                if (!_templateChecked && System.Diagnostics.Process.GetCurrentProcess().ProcessName.Equals("acad", StringComparison.OrdinalIgnoreCase))
+                {
+                    dynamic host = AcadApp.AcadApplication;
+                    dynamic files = host.Preferences.Files;
+                    string old = ((string)files.QNewTemplateFile ?? "").TrimEnd('\\', '/');
+                    string template = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(App).Assembly.Location), "Assets", "botplus.dwt");
+                    if (System.IO.Path.GetFileName(old).Equals("botplus.dwt", StringComparison.OrdinalIgnoreCase) && !System.IO.File.Exists(old) && System.IO.File.Exists(template)) files.QNewTemplateFile = template;
+                    _templateChecked = true;
+                }
                 _ribbon.EnsureCreated();
                 _contextMenu.EnsureCreated();
                 if (SettingsService.Settings.EnableClassicUi) _classic.EnsureCreated();

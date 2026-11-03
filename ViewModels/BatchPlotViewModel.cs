@@ -35,7 +35,7 @@ namespace BotPlusAutocadTool.ViewModels
         private ObservableCollection<BatchPlotItem> _items;
 
         // NEW: галочка "В фоне" -> BACKGROUNDPLOT (3/0)
-        private bool _plotInBackground = true;
+        private bool _plotInBackground = false;
         private bool _plotTransparency;
 
         // NEW: общий чекбокс в шапке таблицы (tri-state)
@@ -128,7 +128,7 @@ namespace BotPlusAutocadTool.ViewModels
         {
             if (_service.SearchOrder == order || IsBusy) return;
             _service.SearchOrder = order;
-            UserPreferences.Write("BatchPlotOrder", new Newtonsoft.Json.Linq.JObject { ["Direction"] = order.ToString() });
+            UserPreferences.Write("BatchPlotOrder", new Newtonsoft.Json.Linq.JObject { ["Direction"] = order.ToString(), ["DefaultsRevision"] = 181 });
             // Reuse the items to keep edited titles, numbers and checkboxes.
             Items = new ObservableCollection<BatchPlotItem>(_service.SortFrames(Items));
             OnPropertyChanged(nameof(IsTopToBottom));
@@ -265,6 +265,12 @@ namespace BotPlusAutocadTool.ViewModels
             _service = new BatchPlotService();
             int savedUnits = UserPreferences.Read(UnitsSection).Value<int?>("Unit") ?? 0;
             if (PlotUnits.Definitions.Any(unit => unit.Code == savedUnits)) _service.DrawingUnitsOverride = savedUnits;
+            var orderPreset = UserPreferences.Read("BatchPlotOrder");
+            if (orderPreset.Value<int?>("DefaultsRevision") != 181)
+            {
+                orderPreset["Direction"] = "LeftToRight"; orderPreset["DefaultsRevision"] = 181;
+                UserPreferences.Write("BatchPlotOrder", orderPreset);
+            }
             if (Enum.TryParse(UserPreferences.Read("BatchPlotOrder").Value<string>("Direction"), out PlotSearchOrder order)
                 && Enum.IsDefined(typeof(PlotSearchOrder), order)) _service.SearchOrder = order;
             var filter = UserPreferences.Read("BatchPlotFilter");

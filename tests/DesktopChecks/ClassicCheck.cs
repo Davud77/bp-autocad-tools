@@ -17,6 +17,14 @@ public sealed class ClassicCheck
     {
         try
         {
+            if (ClassicUiController.Macro("TEST") != "\u0003\u0003TEST\r") throw new InvalidOperationException("ActiveX macro contains literal escapes");
+            foreach (int size in new[] { 16, 32 })
+            {
+                var image = new System.Windows.Media.Imaging.BitmapImage(new Uri(ClassicUiController.GetBitmap("frame.png", size)));
+                if (image.PixelWidth != size || BitConverter.ToUInt16(File.ReadAllBytes(ClassicUiController.GetBitmap("frame.png",size)),28) != 24) throw new InvalidOperationException("Invalid classic bitmap format");
+                byte[] pixel = new byte[4]; image.CopyPixels(new System.Windows.Int32Rect(0,0,1,1), pixel, 4, 0);
+                if (pixel.All(value => value == 0)) throw new InvalidOperationException("Classic icon has black background");
+            }
             _menuBar = AcadApp.GetSystemVariable("MENUBAR");
             _ribbon = new RibbonController(); _ribbon.EnsureCreated();
             var tab = ComponentManager.Ribbon?.FindTab(CommandCatalog.TabId);
@@ -31,7 +39,7 @@ public sealed class ClassicCheck
             dynamic menus = app.MenuGroups.Item(0).Menus, bars = app.MenuGroups.Item(0).Toolbars;
             dynamic menu = menus.Item(ClassicUiController.UiName), bar = bars.Item(ClassicUiController.UiName);
             if ((int)menu.Count != 6 || (int)bar.Count != 29 || !(bool)bar.Visible || !(bool)menu.OnMenuBar) throw new InvalidOperationException("Unexpected menu/toolbar state");
-            if ((string)menu.Item(2).SubMenu.Item(3).Macro != "^C^CBOTPLUS_CLEARTABLESTYLE ") throw new InvalidOperationException("Missing table reset command");
+            if ((string)menu.Item(2).SubMenu.Item(3).Macro != ClassicUiController.Macro("BOTPLUS_CLEARTABLESTYLE")) throw new InvalidOperationException("Missing table reset command");
             _controller.RemoveIfPresent(); _controller.RemoveIfPresent();
             if ((bool)menu.OnMenuBar) throw new InvalidOperationException("Disabled classic menu remains on menubar");
             for (int i = 0; i < (int)bars.Count; i++)

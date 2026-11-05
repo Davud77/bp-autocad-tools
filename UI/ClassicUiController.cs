@@ -16,18 +16,17 @@ namespace BotPlusAutocadTool.UI
         internal static string UiName => CommandCatalog.TabTitle + " 1.8.1";
         private dynamic _menu, _toolbar;
         private string _workspace;
-        private bool? _ribbonVisible;
-        private bool _forceVisible;
         private string _disabledWorkspace;
         internal void Show()
         {
-            _forceVisible = true; _workspace = null;
+            _workspace = null;
             EnsureCreated();
             AcadApp.SetSystemVariable("MENUBAR", 1);
         }
+        // Called only on interface events (startup, workspace switch, CUI reload, settings change), not by polling.
         internal void RemoveIfPresent()
         {
-            if (!Process.GetCurrentProcess().ProcessName.Equals("acad", StringComparison.OrdinalIgnoreCase)) return;
+            if (!HostInfo.IsDesktop) return;
             string workspace = AcadApp.GetSystemVariable("WSCURRENT")?.ToString() ?? "";
             if (_disabledWorkspace == workspace && _menu == null && _toolbar == null) return;
             dynamic app = AcadApp.AcadApplication;
@@ -41,10 +40,9 @@ namespace BotPlusAutocadTool.UI
         internal void EnsureCreated()
         {
             _disabledWorkspace = null;
-            if (!Process.GetCurrentProcess().ProcessName.Equals("acad", StringComparison.OrdinalIgnoreCase)) return;
+            if (!HostInfo.IsDesktop) return;
             string workspace = AcadApp.GetSystemVariable("WSCURRENT")?.ToString() ?? "";
-            bool ribbonVisible = Autodesk.Windows.ComponentManager.Ribbon?.IsVisible == true;
-            if (_menu != null && _toolbar != null && _workspace == workspace && _ribbonVisible == ribbonVisible) return;
+            if (_menu != null && _toolbar != null && _workspace == workspace) return;
             dynamic app = AcadApp.AcadApplication;
             dynamic group = app.MenuGroups.Item(0);
             HideLegacy(group);
@@ -86,8 +84,9 @@ namespace BotPlusAutocadTool.UI
                 }
                 _toolbar.Dock(0); // acToolbarDockTop
             }
-            _toolbar.Visible = _forceVisible || !ribbonVisible;
-            _workspace = workspace; _ribbonVisible = ribbonVisible;
+            // Classic mode replaces the ribbon tab, so the toolbar does not depend on ribbon visibility.
+            _toolbar.Visible = true;
+            _workspace = workspace;
         }
         private static void HideLegacy(dynamic group)
         {
@@ -160,7 +159,7 @@ namespace BotPlusAutocadTool.UI
                         // AutoCAD retains hidden CUI definitions until its native UI can release them.
                     }
                 }
-                finally { _menu = null; _workspace = null; _ribbonVisible = null; _forceVisible = false; }
+                finally { _menu = null; _workspace = null; }
             }
         }
     }

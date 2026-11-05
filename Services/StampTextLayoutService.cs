@@ -58,7 +58,11 @@ namespace BotPlusAutocadTool.Services
             return result;
         }
 
-        public static void Apply(Database database)
+        public static void Apply(Database database) => Apply(database, evaluateAllFields: true);
+
+        /// <param name="evaluateAllFields">Re-evaluate every field of the drawing (DWG properties changed).
+        /// Otherwise only the fields of converted attributes are evaluated.</param>
+        public static void Apply(Database database, bool evaluateAllFields)
         {
             var summary = new DatabaseSummaryInfoBuilder(database.SummaryInfo);
             bool migrated = false;
@@ -82,13 +86,11 @@ namespace BotPlusAutocadTool.Services
                 var pending = new List<Tuple<AttributeReference, MText, bool>>();
                 try
                 {
-                    foreach (ObjectId id in table)
+                    // Direct references of WM_FORMAT and its anonymous dynamic variants, not a scan of every object.
+                    foreach (ObjectId frameId in FrameIds(table, transaction))
                     {
-                        var owner = (BlockTableRecord)transaction.GetObject(id, OpenMode.ForRead);
-                        if (owner.IsFromExternalReference) continue;
-                        foreach (ObjectId entityId in owner)
                         {
-                            if (!(transaction.GetObject(entityId, OpenMode.ForRead) is BlockReference frame) || !IsFormat(frame, transaction)) continue;
+                            var frame = (BlockReference)transaction.GetObject(frameId, OpenMode.ForRead);
                             var definition = (BlockTableRecord)transaction.GetObject(frame.BlockTableRecord, OpenMode.ForRead);
                             var anchors = definition.Cast<ObjectId>().Select(a => transaction.GetObject(a, OpenMode.ForRead)).OfType<AttributeDefinition>()
                                 .ToDictionary(a => a.Tag, StringComparer.OrdinalIgnoreCase);
@@ -144,7 +146,11 @@ namespace BotPlusAutocadTool.Services
                         if (!change.Item3)
                         {
                             var cell = Cells.First(c => string.Equals(c.Tag, change.Item1.Tag, StringComparison.OrdinalIgnoreCase));
-                            using (var field = new Field("%<\\AcVar CustomDP." + cell.Property + ">%", true)) change.Item1.SetField(field);
+                            using (var field = new Field("%<\\AcVar CustomDP." + cell.Property + ">%", true))
+                            {
+                                change.Item1.SetField(field);
+                                if (!evaluateAllFields) field.Evaluate((int)FieldEvaluationContext.Demand, database);
+                            }
                             change.Item1.UpdateMTextAttribute();
                         }
                         change.Item1.RecordGraphicsModified(true);
@@ -153,7 +159,24 @@ namespace BotPlusAutocadTool.Services
                 }
                 finally { foreach (var change in pending) change.Item2.Dispose(); }
             }
-            database.EvaluateFields(FieldEvaluationContext.Demand);
+            if (evaluateAllFields) database.EvaluateFields(FieldEvaluationContext.Demand);
+        }
+
+        private static IEnumerable<ObjectId> FrameIds(BlockTable table, Transaction transaction)
+        {
+            if (!table.Has(FormatInsertService.BlockName)) yield break;
+            var format = (BlockTableRecord)transaction.GetObject(table[FormatInsertService.BlockName], OpenMode.ForRead);
+            if (format.IsFromExternalReference) yield break;
+            var definitions = new List<ObjectId> { format.ObjectId };
+            if (format.IsDynamicBlock) definitions.AddRange(format.GetAnonymousBlockIds().Cast<ObjectId>());
+            var seen = new HashSet<ObjectId>();
+            foreach (var definitionId in definitions)
+            {
+                if (definitionId.IsNull || definitionId.IsErased) continue;
+                var definition = (BlockTableRecord)transaction.GetObject(definitionId, OpenMode.ForRead);
+                foreach (ObjectId id in definition.GetBlockReferenceIds(true, false))
+                    if (!id.IsNull && !id.IsErased && seen.Add(id)) yield return id;
+            }
         }
         private static string BreakLongWords(MText source, string value, double width, string prefix)
         {
@@ -187,11 +210,6 @@ namespace BotPlusAutocadTool.Services
                     return string.Join("\n", result);
                 });
             }
-        }
-        private static bool IsFormat(BlockReference block, Transaction transaction)
-        {
-            var id = block.IsDynamicBlock ? block.DynamicBlockTableRecord : block.BlockTableRecord;
-            return string.Equals(((BlockTableRecord)transaction.GetObject(id, OpenMode.ForRead)).Name, FormatInsertService.BlockName, StringComparison.OrdinalIgnoreCase);
         }
         private static bool Matches(AttributeReference attribute, MText expected, bool explicitBreaks, string property, Transaction transaction)
         {

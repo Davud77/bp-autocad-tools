@@ -136,6 +136,8 @@ namespace BotPlusAutocadTool.Views
             settings.AutoCheckUpdates = edited.AutoCheckUpdates; settings.IncludePrereleaseUpdates = edited.IncludePrereleaseUpdates;
             if (!SettingsService.TrySave())
             { MessageBox.Show(this, "Не удалось сохранить настройки. Подробности записаны в журнал.", Title); return; }
+            // Ribbon tab or classic menus: applied immediately, without restarting AutoCAD.
+            App.ApplyInterfaceSettings();
             Close();
         }
         public static void OpenUpdates()

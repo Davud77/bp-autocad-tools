@@ -91,6 +91,11 @@ namespace BotPlusAutocadTool.Services
         public bool AutoInstallUpdates { get; set; } = false;
         public string PendingUpdateDirectory { get; set; }
         public bool EnableClassicUi { get; set; } = false;
+        /// <summary>Selection length in the status bar. Off: no selection tracking at all.</summary>
+        public bool SelectionLengthEnabled { get; set; } = true;
+        /// <summary>Installed BotPlus PDF plotter per AutoCAD release ("25.1", "26.0"): plugin version and
+        /// profile, then the .pc3, .pmp and driver paths found on this PC.</summary>
+        public System.Collections.Generic.Dictionary<string, string> PdfPlotterInstalls { get; set; } = new();
         public bool AutoCheckUpdates { get; set; } = true;
         public bool IncludePrereleaseUpdates { get; set; } = false;
         public DateTime LastUpdateCheckUtc { get; set; }
@@ -118,6 +123,7 @@ namespace BotPlusAutocadTool.Services
             if (!double.IsFinite(FrameInsertionScale) || FrameInsertionScale <= 0 || FrameInsertionScale > 1000000) FrameInsertionScale = 100;
             if (PlotScale != 1 && PlotScale != 100) PlotScale = 100;
             PlotOutputDirectory ??= "";
+            PdfPlotterInstalls ??= new();
         }
     }
 }

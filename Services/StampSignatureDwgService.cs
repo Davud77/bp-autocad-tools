@@ -22,23 +22,55 @@ namespace BotPlusAutocadTool.Services
         private const string StoreKey = "BotPlusAutocadTool.StampSignatures";
         private const string MarkerKey = "BotPlusAutocadTool.SignatureSlot";
 
+        private sealed class StoreCache
+        {
+            public string Hash;
+            public Dictionary<string, StampSignature> Signatures;
+        }
+        // Parsed signature stores per open drawing; re-parsed only when the stored bytes change.
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Database, StoreCache> StoreCaches = new();
+        // PNG hash -> pixel size of the generated geometry, so existing signature blocks need no image decoding.
+        private static readonly Dictionary<string, (int Width, int Height)> GeometrySizes = new(StringComparer.Ordinal);
+
         public static Dictionary<string, StampSignature> Load(Database database)
+        {
+            var bytes = ReadStore(database);
+            return bytes == null ? new Dictionary<string, StampSignature>() : Parse(bytes);
+        }
+
+        /// <summary>Read-only view for synchronization: the parsed store is reused while its bytes are unchanged.</summary>
+        private static Dictionary<string, StampSignature> LoadCached(Database database)
+        {
+            var bytes = ReadStore(database);
+            if (bytes == null) { StoreCaches.Remove(database); return new Dictionary<string, StampSignature>(); }
+            string hash = Convert.ToHexString(SHA256.HashData(bytes));
+            if (StoreCaches.TryGetValue(database, out var cached) && cached.Hash == hash) return cached.Signatures;
+            var signatures = Parse(bytes);
+            StoreCaches.AddOrUpdate(database, new StoreCache { Hash = hash, Signatures = signatures });
+            return signatures;
+        }
+
+        private static byte[] ReadStore(Database database)
         {
             using (var transaction = database.TransactionManager.StartOpenCloseTransaction())
             {
                 var dictionary = (DBDictionary)transaction.GetObject(database.NamedObjectsDictionaryId, OpenMode.ForRead);
-                if (!dictionary.Contains(StoreKey)) return new Dictionary<string, StampSignature>();
+                if (!dictionary.Contains(StoreKey)) return null;
                 var record = (Xrecord)transaction.GetObject(dictionary.GetAt(StoreKey), OpenMode.ForRead);
                 using (var data = record.Data)
                 using (var stream = new MemoryStream())
                 {
-                    foreach (var value in data.AsArray())
-                        if (value.Value is byte[] chunk) stream.Write(chunk, 0, chunk.Length);
+                    if (data != null)
+                        foreach (var value in data.AsArray())
+                            if (value.Value is byte[] chunk) stream.Write(chunk, 0, chunk.Length);
                     if (stream.Length > 16 * 1024 * 1024) throw new InvalidDataException("Хранилище подписей превышает допустимый размер.");
-                    return JsonConvert.DeserializeObject<Dictionary<string, StampSignature>>(Encoding.UTF8.GetString(stream.ToArray())) ?? new Dictionary<string, StampSignature>();
+                    return stream.ToArray();
                 }
             }
         }
+
+        private static Dictionary<string, StampSignature> Parse(byte[] bytes)
+            => JsonConvert.DeserializeObject<Dictionary<string, StampSignature>>(Encoding.UTF8.GetString(bytes)) ?? new Dictionary<string, StampSignature>();
 
         public static void Save(Database database, Dictionary<string, StampSignature> signatures)
         {
@@ -62,7 +94,8 @@ namespace BotPlusAutocadTool.Services
 
         public static void Synchronize(Database database)
         {
-            var signatures = Load(database);
+            if (!HasFormat(database)) return;
+            var signatures = LoadCached(database);
             using (var transaction = database.TransactionManager.StartTransaction())
             {
                 Synchronize(database, transaction, signatures);
@@ -136,16 +169,29 @@ namespace BotPlusAutocadTool.Services
             }
         }
 
+        private static bool HasFormat(Database database)
+        {
+            using (var transaction = database.TransactionManager.StartOpenCloseTransaction())
+                return ((BlockTable)transaction.GetObject(database.BlockTableId, OpenMode.ForRead)).Has(FormatInsertService.BlockName);
+        }
+
         private static ObjectId GetGeometry(Database database, Transaction transaction, StampSignature signature, out int width, out int height)
         {
             if (signature.Png == null || signature.Png.Length == 0) throw new ArgumentException("Подпись не содержит PNG.");
+            string name = "AT_SIG_" + Convert.ToHexString(SHA256.HashData(signature.Png)).Substring(0, 32);
+            var table = (BlockTable)transaction.GetObject(database.BlockTableId, OpenMode.ForRead);
+            // An existing signature block needs only its size: the PNG is decoded once per session.
+            if (table.Has(name) && GeometrySizes.TryGetValue(name, out var known))
+            {
+                width = known.Width; height = known.Height;
+                return table[name];
+            }
             BitmapSource image = signature.Image;
             double factor = Math.Min(1, Math.Min(600.0 / image.PixelWidth, 180.0 / image.PixelHeight));
             if (factor < 1) image = new TransformedBitmap(image, new ScaleTransform(factor, factor));
             var bitmap = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
             width = bitmap.PixelWidth; height = bitmap.PixelHeight;
-            string name = "AT_SIG_" + Convert.ToHexString(SHA256.HashData(signature.Png)).Substring(0, 32);
-            var table = (BlockTable)transaction.GetObject(database.BlockTableId, OpenMode.ForRead);
+            GeometrySizes[name] = (width, height);
             if (table.Has(name)) return table[name];
             if (!table.IsWriteEnabled) table.UpgradeOpen();
             var geometry = new BlockTableRecord { Name = name, Origin = Point3d.Origin };

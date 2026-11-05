@@ -17,12 +17,16 @@ namespace BotPlusAutocadTool.UI
         private RibbonTab _tab;
         private RibbonControl _ribbon;
 
-        public void EnsureCreated()
+        /// <summary>True when the tab was created on this ribbon instance (no tab lookup).</summary>
+        internal bool IsAttachedTo(RibbonControl ribbon) => ribbon != null && ReferenceEquals(_ribbon, ribbon) && _tab != null;
+
+        /// <returns>False while AutoCAD has not created the ribbon yet.</returns>
+        public bool EnsureCreated()
         {
             var ribbon = ComponentManager.Ribbon;
-            if (ribbon == null) return;
+            if (ribbon == null) return false;
             if (ReferenceEquals(_ribbon, ribbon) && ReferenceEquals(ribbon.FindTab(CommandCatalog.TabId), _tab) && _tab?.Panels.Count == CommandCatalog.Panels.Length)
-                return;
+                return true;
 
             var tab = BuildTab();
             var previous = ribbon.FindTab(CommandCatalog.TabId);
@@ -30,6 +34,17 @@ namespace BotPlusAutocadTool.UI
             ribbon.Tabs.Add(tab);
             _ribbon = ribbon;
             _tab = tab;
+            return true;
+        }
+
+        /// <summary>Classic mode: the ribbon tab is not shown.</summary>
+        public void RemoveIfPresent()
+        {
+            var ribbon = ComponentManager.Ribbon;
+            var existing = ribbon?.FindTab(CommandCatalog.TabId);
+            if (existing != null) ribbon.Tabs.Remove(existing);
+            _tab = null;
+            _ribbon = null;
         }
 
         internal RibbonTab BuildTab()
@@ -88,9 +103,13 @@ namespace BotPlusAutocadTool.UI
 
     internal sealed class RibbonCommand : ICommand
     {
+        // Raised only when drawings open, close or switch, not after every mouse or keyboard input.
+        private static event EventHandler AvailabilityChanged;
+        internal static void RaiseAvailabilityChanged() => AvailabilityChanged?.Invoke(null, EventArgs.Empty);
+
         private readonly string _name;
         public RibbonCommand(string name) => _name = name;
-        public event EventHandler CanExecuteChanged { add { CommandManager.RequerySuggested += value; } remove { CommandManager.RequerySuggested -= value; } }
+        public event EventHandler CanExecuteChanged { add { AvailabilityChanged += value; } remove { AvailabilityChanged -= value; } }
         public bool CanExecute(object parameter) => AcadApp.DocumentManager.MdiActiveDocument != null;
         public void Execute(object parameter)
         {

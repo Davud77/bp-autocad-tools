@@ -16,20 +16,64 @@ namespace BotPlusAutocadTool.Services
         // printer search paths, new users and isolated Core Console profiles.
         public static string EnsureInstalled()
         {
+            // Fast path: the same plugin version already installed the plotter for this AutoCAD release
+            // and profile. No device enumeration, file reading or compression.
+            string release = null, environment = null;
+            try { release = AcadApp.Version.Major + "." + AcadApp.Version.Minor; environment = Environment(); }
+            catch (Exception ex) { Infrastructure.PluginLog.Error("PDF plotter environment", ex); }
+            var installs = SettingsService.Settings.PdfPlotterInstalls;
+            if (release != null && installs.TryGetValue(release, out var stored) && Installed(stored, environment, out var installedPath))
+                return installedPath;
+            string result = Install(out var pmpPath, out var driver);
+            if (release != null)
+            {
+                installs[release] = string.Join("\n", environment, result, pmpPath, driver);
+                SettingsService.Save();
+            }
+            return result;
+        }
+
+        /// <summary>Everything that changes where AutoCAD looks for plotters. Paths come from AutoCAD on this PC.</summary>
+        private static string Environment()
+        {
+            string version = typeof(PdfPlotterService).Assembly.GetName().Version?.ToString() ?? "";
+            string roaming = Convert.ToString(AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX")) ?? "";
+            string searchPath = "";
+            if (Infrastructure.HostInfo.IsDesktop)
+            {
+                try { dynamic host = AcadApp.AcadApplication; searchPath = (string)host.Preferences.Files.PrinterConfigPath ?? ""; }
+                catch { searchPath = ""; }
+            }
+            return version + "|" + roaming + "|" + searchPath;
+        }
+
+        private static bool Installed(string stored, string environment, out string configPath)
+        {
+            configPath = null;
+            var parts = (stored ?? "").Split('\n');
+            if (parts.Length != 4 || parts[0] != environment) return false;
+            // Moved profiles, deleted files or a reinstalled AutoCAD invalidate the record.
+            if (!File.Exists(parts[1]) || !File.Exists(parts[2]) || !File.Exists(parts[3])) return false;
+            configPath = parts[1];
+            return true;
+        }
+
+        private static string Install(out string pmpPath, out string driver)
+        {
             string plotters = GetPlotterFolder();
             plotters = plotters.Split(';').First(p => !string.IsNullOrWhiteSpace(p)).Trim();
             var assets = Path.Combine(Path.GetDirectoryName(typeof(PdfPlotterService).Assembly.Location), "Assets", "Plotters");
-            var pmpPath = Path.Combine(plotters, "PMP Files", "BotPlus PDF.pmp");
+            pmpPath = Path.Combine(plotters, "PMP Files", "BotPlus PDF.pmp");
             Directory.CreateDirectory(Path.GetDirectoryName(pmpPath));
             var pmp = ReadConfiguration(Path.Combine(assets, "PMP Files", "BotPlus PDF.pmp"));
-            bool changed = WriteIfChanged(pmpPath, CompressConfiguration(pmp));
+            bool changed = WriteIfChanged(pmpPath, pmp);
             var template = ReadConfiguration(Path.Combine(assets, PlotterName));
             var drivers = Path.Combine(Path.GetDirectoryName(typeof(PlotConfigManager).Assembly.Location), "drv");
-            var driver = Directory.GetFiles(drivers, "pdfplot*.hdi").OrderByDescending(p => p, StringComparer.OrdinalIgnoreCase).First();
+            driver = Directory.GetFiles(drivers, "pdfplot*.hdi").OrderByDescending(p => p, StringComparer.OrdinalIgnoreCase).First();
             template = template.Replace("PMP Files\\BotPlus PDF.pmp", pmpPath)
                 .Replace("driver_pathname=\"pdfplot.hdi", "driver_pathname=\"" + driver);
             var configPath = Path.Combine(plotters, PlotterName);
-            changed |= WriteIfChanged(configPath, CompressConfiguration(template));
+            changed |= WriteIfChanged(configPath, template);
             if (changed) PlotConfigManager.RefreshList(RefreshCode.All);
             return configPath;
         }
@@ -47,10 +91,15 @@ namespace BotPlusAutocadTool.Services
                 Path.Combine((string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX"), "Plotters");
         }
 
-        private static bool WriteIfChanged(string path, byte[] bytes)
+        // Compares the unpacked text: compression runs only when the file really has to be written.
+        private static bool WriteIfChanged(string path, string text)
         {
-            if (File.Exists(path) && File.ReadAllBytes(path).SequenceEqual(bytes)) return false;
-            Infrastructure.AtomicFile.WriteAllBytes(path, bytes);
+            if (File.Exists(path))
+            {
+                try { if (ReadConfiguration(path) == text.TrimEnd('\0')) return false; }
+                catch (Exception) { /* Damaged or foreign file: overwrite it. */ }
+            }
+            Infrastructure.AtomicFile.WriteAllBytes(path, CompressConfiguration(text));
             return true;
         }
 

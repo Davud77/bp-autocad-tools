@@ -187,7 +187,7 @@ namespace BotPlusAutocadTool.ViewModels
             _isListening = true;
             AcadApp.DocumentManager.DocumentActivated += OnDocumentActivated;
             AcadApp.DocumentManager.DocumentToBeDestroyed += OnDocumentClosing;
-            AcadApp.Idle += OnIdle;
+            SelectionLengthService.SetWindowListening(true);
             AttachDocument(AcadApp.DocumentManager.MdiActiveDocument);
         }
 
@@ -195,7 +195,8 @@ namespace BotPlusAutocadTool.ViewModels
         {
             if (!_isListening) return;
             _isListening = false;
-            AcadApp.Idle -= OnIdle;
+            UnhookIdle();
+            SelectionLengthService.SetWindowListening(false);
             AcadApp.DocumentManager.DocumentActivated -= OnDocumentActivated;
             AcadApp.DocumentManager.DocumentToBeDestroyed -= OnDocumentClosing;
             AttachDocument(null);
@@ -220,7 +221,7 @@ namespace BotPlusAutocadTool.ViewModels
                 document.CommandCancelled += OnSelectionChanged;
                 document.CommandFailed += OnSelectionChanged;
             }
-            _selectionDirty = true;
+            MarkSelectionDirty();
         }
 
         private void OnDocumentActivated(object sender, DocumentCollectionEventArgs args) => AttachDocument(args.Document);
@@ -228,14 +229,33 @@ namespace BotPlusAutocadTool.ViewModels
         {
             if (ReferenceEquals(args.Document, _observedDocument)) AttachDocument(null);
         }
-        private void OnSelectionChanged(object sender, EventArgs args) => _selectionDirty = true;
+        private void OnSelectionChanged(object sender, EventArgs args) => MarkSelectionDirty();
 
+        private bool _idleHooked;
+        private void MarkSelectionDirty()
+        {
+            _selectionDirty = true;
+            if (!_isListening || _idleHooked) return;
+            AcadApp.Idle += OnIdle;
+            _idleHooked = true;
+        }
+        private void UnhookIdle()
+        {
+            if (!_idleHooked) return;
+            AcadApp.Idle -= OnIdle;
+            _idleHooked = false;
+        }
+
+        // One-shot: recalculates once after a selection change, then unsubscribes.
         private void OnIdle(object sender, EventArgs args)
         {
-            if (!_selectionDirty || DateTime.UtcNow < _nextCalculation) return;
+            if (!_selectionDirty) { UnhookIdle(); return; }
+            if (DateTime.UtcNow < _nextCalculation) return;
             try
             {
                 var document = AcadApp.DocumentManager.MdiActiveDocument;
+                // The command end event marks the selection again.
+                UnhookIdle();
                 if (document != null && !string.IsNullOrEmpty(document.CommandInProgress)) return;
                 _selectionDirty = false;
                 _nextCalculation = DateTime.UtcNow.AddMilliseconds(150);
@@ -268,6 +288,7 @@ namespace BotPlusAutocadTool.ViewModels
             Groups.Clear();
             _rawTotalLength = _rawTotalArea = 0;
             UpdateTotals();
+            SelectionLengthService.PublishFromWindow(0);
         }
         private void ProcessSelection(ObjectId[] ids)
         {
@@ -294,6 +315,8 @@ namespace BotPlusAutocadTool.ViewModels
 
                 UpdateTotals();
                 tr.Commit();
+                // The status bar shows the same selection, without circles.
+                SelectionLengthService.PublishFromWindow(results.Where(g => g.ObjectType != "Окружность").Sum(g => g.RawTotalLength));
             }
         }
 

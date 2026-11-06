@@ -143,6 +143,9 @@ namespace BotPlusAutocadTool.Services
                             internalText.Contents = change.Item2.Contents;
                             change.Item1.MTextAttribute = internalText;
                         }
+                        // UpdateMTextAttribute rebuilds the MText at the attribute's alignment point. After conversion that
+                        // point is left at the baseline of a single-line "Middle" attribute, half a text height below the cell centre.
+                        change.Item1.AlignmentPoint = change.Item2.Location;
                         if (!change.Item3)
                         {
                             var cell = Cells.First(c => string.Equals(c.Tag, change.Item1.Tag, StringComparison.OrdinalIgnoreCase));

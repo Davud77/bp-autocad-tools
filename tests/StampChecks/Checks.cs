@@ -67,6 +67,23 @@ public sealed class Checks
                     StampTextLayoutService.Apply(database);
                     using (var tr = database.TransactionManager.StartTransaction())
                     {
+                        // Every converted stamp field stays centred on the alignment point of its attribute definition.
+                        var centredFrame = (BlockReference)tr.GetObject(inserted, OpenMode.ForRead);
+                        var anchors = ((BlockTableRecord)tr.GetObject(centredFrame.BlockTableRecord, OpenMode.ForRead)).Cast<ObjectId>()
+                            .Select(id => tr.GetObject(id, OpenMode.ForRead)).OfType<AttributeDefinition>().ToDictionary(a => a.Tag);
+                        int centred = 0;
+                        foreach (ObjectId aid in centredFrame.AttributeCollection)
+                        {
+                            var attribute = (AttributeReference)tr.GetObject(aid, OpenMode.ForRead);
+                            if (!new[] { "ШИФР", "ОБЪЕКТ", "КОМПЛЕКТ", "КОМПАНИЯ" }.Contains(attribute.Tag)) continue;
+                            Require(attribute.IsMTextAttribute, attribute.Tag + " stayed single-line.");
+                            var expected = anchors[attribute.Tag].AlignmentPoint.TransformBy(centredFrame.BlockTransform);
+                            using (var text = attribute.MTextAttribute)
+                                Require(text.Location.DistanceTo(expected) < 1e-6, attribute.Tag + " is off its cell centre: " + text.Location + " instead of " + expected);
+                            centred++;
+                        }
+                        Require(centred == 4, "Not every stamp field was checked.");
+                        log.Add("PASS: stamp fields stay centred in their cells after conversion to multiline.");
                         var frame = (BlockReference)tr.GetObject(inserted, OpenMode.ForRead);
                         foreach (ObjectId aid in frame.AttributeCollection)
                         {

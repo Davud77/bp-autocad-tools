@@ -59,6 +59,7 @@ Source: "{#ProjectDir}\README.md"; DestDir: "{app}\Documentation"; Flags: ignore
 Source: "{#ProjectDir}\LICENSE"; DestDir: "{app}\Documentation"; Flags: ignoreversion
 Source: "{#ProjectDir}\THIRD-PARTY-NOTICES.md"; DestDir: "{app}\Documentation"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\USAGE-1.10.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
+Source: "{#ProjectDir}\docs\RELEASE-1.10.1.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\RELEASE-1.10.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\USAGE-1.9.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\RELEASE-1.9.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion

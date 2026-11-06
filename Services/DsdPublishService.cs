@@ -1,9 +1,12 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.PlottingServices;
+using BotPlusAutocadTool.Infrastructure;
 using BotPlusAutocadTool.Models;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -221,9 +224,9 @@ namespace BotPlusAutocadTool.Services
                 AcadApp.Publisher.CancelledOrFailedPublishing -= OnPublishFailed;
                 AcadApp.DocumentManager.DocumentToBeDestroyed -= OnDocumentClosing;
                 AcadApp.Idle -= OnIdle;
-                try { if (Convert.ToInt32(AcadApp.GetSystemVariable("FILEDIA")) == 0) AcadApp.SetSystemVariable("FILEDIA", _oldFileDia); } catch { }
-                try { if (Convert.ToInt32(AcadApp.GetSystemVariable("BACKGROUNDPLOT")) == _ownedBackgroundPlot) AcadApp.SetSystemVariable("BACKGROUNDPLOT", _oldBackgroundPlot); } catch { }
-                try { if (Convert.ToInt32(AcadApp.GetSystemVariable("PLOTTRANSPARENCYOVERRIDE")) == _ownedTransparencyOverride) AcadApp.SetSystemVariable("PLOTTRANSPARENCYOVERRIDE", _oldTransparencyOverride); } catch { }
+                try { if (SystemVariables.GetInt("FILEDIA") == 0) AcadApp.SetSystemVariable("FILEDIA", _oldFileDia); } catch { }
+                try { if (SystemVariables.GetInt("BACKGROUNDPLOT") == _ownedBackgroundPlot) AcadApp.SetSystemVariable("BACKGROUNDPLOT", _oldBackgroundPlot); } catch { }
+                try { if (SystemVariables.GetInt("PLOTTRANSPARENCYOVERRIDE") == _ownedTransparencyOverride) AcadApp.SetSystemVariable("PLOTTRANSPARENCYOVERRIDE", _oldTransparencyOverride); } catch { }
                 if (ReferenceEquals(_job, this)) _job = null;
             }
         }

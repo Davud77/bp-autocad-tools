@@ -1,14 +1,10 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using BotPlusAutocadTool.Models;
 
 namespace BotPlusAutocadTool.Services
@@ -139,7 +135,7 @@ namespace BotPlusAutocadTool.Services
                     if (sAtts.Count != tAtts.Count) return false;
                     foreach (var kvp in sAtts)
                     {
-                        if (!tAtts.ContainsKey(kvp.Key) || tAtts[kvp.Key] != kvp.Value) return false;
+                        if (!tAtts.TryGetValue(kvp.Key, out var target) || target != kvp.Value) return false;
                     }
                 }
                 else if (_opts.BlockAnyAttribute)
@@ -148,7 +144,7 @@ namespace BotPlusAutocadTool.Services
                     bool anyMatch = false;
                     foreach (var kvp in sAtts)
                     {
-                        if (tAtts.ContainsKey(kvp.Key) && tAtts[kvp.Key] == kvp.Value)
+                        if (tAtts.TryGetValue(kvp.Key, out var target) && target == kvp.Value)
                         {
                             anyMatch = true; break;
                         }

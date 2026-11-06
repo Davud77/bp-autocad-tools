@@ -57,7 +57,7 @@ public class Smoke
             }
             var commandCount = typeof(BotPlusAutocadTool.App).Assembly.GetTypes()
                 .SelectMany(type => type.GetMethods()).SelectMany(method => method.GetCustomAttributes(typeof(CommandMethodAttribute), false)).Count();
-            if (commandCount != 77) throw new InvalidOperationException("Missing commands: " + commandCount);
+            if (commandCount != 71) throw new InvalidOperationException("Missing commands: " + commandCount);
             using (var library = new Database(false, true))
             {
                 library.ReadDwgFile(FormatInsertService.TemplatePath, FileOpenMode.OpenForReadAndAllShare, true, null);
@@ -108,7 +108,7 @@ public class Smoke
             DomainChecks.Run(AcadApp.DocumentManager.MdiActiveDocument);
             FeatureChecks.Run(editor);
             ImportedWindowChecks.Run();
-            editor.WriteMessage("\nBOTPLUS_SMOKE_PASS: 77 commands; expanded domain checks and WPF window layout.\n");
+            editor.WriteMessage("\nBOTPLUS_SMOKE_PASS: 71 commands; expanded domain checks and WPF window layout.\n");
         }
         catch (System.Exception ex)
         {

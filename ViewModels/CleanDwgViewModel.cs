@@ -1,18 +1,27 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
-using Microsoft.Win32;
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
+using System;
 using System.Windows.Input;
+using BotPlusAutocadTool.Infrastructure;
 using BotPlusAutocadTool.Models;
 
 namespace BotPlusAutocadTool.ViewModels
 {
     public class CleanDwgViewModel : BaseViewModel
     {
+        private const string SettingsName = "CleanDwg";
+        private const string LegacySettingsKey = @"Software\CleanDwg";
+
         private CleanDwgOptions _options;
+
+        public CleanDwgViewModel()
+        {
+            _options = RegistryOptions.Load<CleanDwgOptions>(SettingsName, LegacySettingsKey);
+            ExecuteCommand = new RelayCommand(_ => Close(true));
+            CancelCommand = new RelayCommand(_ => Close(false));
+            SelectAllCommand = new RelayCommand(_ => SetAll(true));
+            ClearAllCommand = new RelayCommand(_ => SetAll(false));
+        }
 
         public CleanDwgOptions Options
         {
@@ -26,82 +35,28 @@ namespace BotPlusAutocadTool.ViewModels
         public ICommand ClearAllCommand { get; }
 
         public bool? DialogResult { get; private set; }
-        public System.Action CloseAction { get; set; }
+        public Action CloseAction { get; set; }
 
-        private const string REG_KEY = @"Software\CleanDwg";
-
-        public CleanDwgViewModel()
+        private void Close(bool accepted)
         {
-            _options = LoadSettings();
-
-            ExecuteCommand = new RelayCommand(x => Execute());
-            CancelCommand = new RelayCommand(x => Cancel());
-            SelectAllCommand = new RelayCommand(x => SetAll(true));
-            ClearAllCommand = new RelayCommand(x => SetAll(false));
-        }
-
-        private void Execute()
-        {
-            if (Options.RememberSettings) SaveSettings();
-            DialogResult = true;
+            if (accepted && Options.RememberSettings) RegistryOptions.Save(SettingsName, Options);
+            DialogResult = accepted;
             CloseAction?.Invoke();
         }
 
-        private void Cancel()
+        private void SetAll(bool value)
         {
-            DialogResult = false;
-            CloseAction?.Invoke();
+            // Saving the drawing is an action, not a cleanup category.
+            RegistryOptions.SetAll(Options, value, nameof(CleanDwgOptions.SaveDoc));
+            RefreshOptions();
         }
 
-        private void SetAll(bool val)
+        /// <summary>The options model does not raise change notifications; rebinding re-reads every check box.</summary>
+        private void RefreshOptions()
         {
-            Options.Points = val;
-            Options.Wipeouts = val;
-            Options.BlankText = val;
-            Options.Groups = val;
-            Options.LayerFilters = val;
-            Options.RegApps = val;
-            Options.PurgeAll = val;
-            Options.Audit = val;
-            // ... (обновить остальные поля)
-
-            var temp = Options; Options = null; Options = temp; // Hack update UI
-        }
-
-        private CleanDwgOptions LoadSettings()
-        {
-            var opt = new CleanDwgOptions();
-            try
-            {
-                using (var key = Registry.CurrentUser.OpenSubKey(REG_KEY))
-                {
-                    if (key != null)
-                    {
-                        // Пример загрузки (можно добавить для всех свойств)
-                        opt.Points = int.Parse(key.GetValue("Points", "0").ToString()) == 1;
-                        opt.Groups = int.Parse(key.GetValue("Groups", "1").ToString()) == 1;
-                        opt.PurgeAll = int.Parse(key.GetValue("PurgeAll", "1").ToString()) == 1;
-                        // ... загрузите остальные по аналогии
-                    }
-                }
-            }
-            catch { }
-            return opt;
-        }
-
-        private void SaveSettings()
-        {
-            try
-            {
-                using (var key = Registry.CurrentUser.CreateSubKey(REG_KEY))
-                {
-                    key.SetValue("Points", Options.Points ? 1 : 0);
-                    key.SetValue("Groups", Options.Groups ? 1 : 0);
-                    key.SetValue("PurgeAll", Options.PurgeAll ? 1 : 0);
-                    // ... сохраните остальные
-                }
-            }
-            catch { }
+            var current = _options;
+            Options = null;
+            Options = current;
         }
     }
 }

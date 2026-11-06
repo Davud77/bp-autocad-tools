@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Autodesk.Windows;
 using BotPlusAutocadTool.Infrastructure;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
@@ -13,9 +11,12 @@ namespace BotPlusAutocadTool.UI
 {
     internal sealed class RibbonController : IDisposable
     {
-        private readonly Dictionary<string, ImageSource> _icons = new(StringComparer.Ordinal);
+        private const string ButtonIdPrefix = "BOTPLUS_";
+
+        private readonly Dictionary<string, string> _iconByButtonId = new(StringComparer.Ordinal);
         private RibbonTab _tab;
         private RibbonControl _ribbon;
+        private bool _darkIcons;
 
         /// <summary>True when the tab was created on this ribbon instance (no tab lookup).</summary>
         internal bool IsAttachedTo(RibbonControl ribbon) => ribbon != null && ReferenceEquals(_ribbon, ribbon) && _tab != null;
@@ -26,7 +27,10 @@ namespace BotPlusAutocadTool.UI
             var ribbon = ComponentManager.Ribbon;
             if (ribbon == null) return false;
             if (ReferenceEquals(_ribbon, ribbon) && ReferenceEquals(ribbon.FindTab(CommandCatalog.TabId), _tab) && _tab?.Panels.Count == CommandCatalog.Panels.Length)
+            {
+                ApplyTheme();
                 return true;
+            }
 
             var tab = BuildTab();
             var previous = ribbon.FindTab(CommandCatalog.TabId);
@@ -47,49 +51,49 @@ namespace BotPlusAutocadTool.UI
             _ribbon = null;
         }
 
+        /// <summary>Swaps button images after a COLORTHEME change without rebuilding the tab.</summary>
+        public void ApplyTheme()
+        {
+            bool dark = SystemVariables.IsDarkTheme;
+            if (_tab == null || dark == _darkIcons) return;
+            foreach (var panel in _tab.Panels)
+            foreach (var item in panel.Source.Items)
+            {
+                if (item is RibbonButton button && button.Id != null && _iconByButtonId.TryGetValue(button.Id, out var icon))
+                    button.LargeImage = CommandIcons.Get(icon, dark);
+            }
+            _darkIcons = dark;
+        }
+
         internal RibbonTab BuildTab()
         {
             // Build before attaching: a missing resource cannot leave a half-built tab.
+            bool dark = SystemVariables.IsDarkTheme;
             var tab = new RibbonTab { Id = CommandCatalog.TabId, Name = CommandCatalog.TabTitle, Title = CommandCatalog.TabTitle };
             foreach (var definition in CommandCatalog.Panels)
             {
                 var source = new RibbonPanelSource { Title = definition.Title };
                 foreach (var button in definition.Buttons)
+                {
+                    string id = ButtonIdPrefix + button.Command;
+                    _iconByButtonId[id] = button.Icon;
                     source.Items.Add(new RibbonButton
                     {
-                        Id = "BOTPLUS_" + button.Command,
+                        Id = id,
                         Text = button.Title,
                         ToolTip = button.Description + "\nКоманда: " + button.Command,
                         ShowText = true,
                         ShowImage = true,
                         Size = RibbonItemSize.Large,
                         Orientation = System.Windows.Controls.Orientation.Vertical,
-                        LargeImage = GetIcon(button.Icon),
+                        LargeImage = CommandIcons.Get(button.Icon, dark),
                         CommandHandler = new RibbonCommand(button.Command)
                     });
+                }
                 tab.Panels.Add(new RibbonPanel { Source = source });
             }
+            _darkIcons = dark;
             return tab;
-        }
-
-        private ImageSource GetIcon(string name)
-        {
-            if (_icons.TryGetValue(name, out var cached)) return cached;
-            ImageSource icon = null;
-            try
-            {
-                var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = new Uri($"pack://application:,,,/{assemblyName};component/Resources/{name}", UriKind.Absolute);
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                bitmap.Freeze();
-                icon = bitmap;
-            }
-            catch (Exception ex) { PluginLog.Error("Ribbon icon " + name, ex); }
-            _icons[name] = icon;
-            return icon;
         }
 
         public void Dispose()
@@ -97,7 +101,6 @@ namespace BotPlusAutocadTool.UI
             if (_tab != null && _ribbon != null) _ribbon.Tabs.Remove(_tab);
             _tab = null;
             _ribbon = null;
-            _icons.Clear();
         }
     }
 

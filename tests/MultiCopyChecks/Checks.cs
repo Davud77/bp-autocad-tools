@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright (c) 2026 OOXGN. See LICENSE in the repository root.
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.IO;
 using System.Linq;
@@ -11,7 +11,7 @@ using AcadApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 public class Checks
 {
-    private static readonly string Log = Path.Combine(Environment.GetEnvironmentVariable("BOTPLUS_FORK_CHECK_DIRECTORY"), "results.log");
+    private static readonly string Log = Path.Combine(Environment.GetEnvironmentVariable("BOTPLUS_CHECK_DIRECTORY"), "results.log");
     private static ObjectId _seedId;
     private static void Assert(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }
     private static void Near(Vector3d actual, Vector3d expected) { Assert((actual - expected).Length < 1e-6, "Wrong displacement"); }

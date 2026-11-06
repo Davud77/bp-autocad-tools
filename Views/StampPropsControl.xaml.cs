@@ -1,19 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// See LICENSE in the repository root.
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
-// ============================================================================
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 
 // File: BotPlusAutocadTool/Views/StampWindow.xaml.cs
-using System.Windows;
 using System;
 using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using BotPlusAutocadTool.Models;
 using BotPlusAutocadTool.Services;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using System.Linq;
-using System.Windows.Controls;
 
 namespace BotPlusAutocadTool.Views
 {

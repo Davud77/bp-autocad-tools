@@ -1,9 +1,12 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using Autodesk.AutoCAD.PlottingServices;
+using BotPlusAutocadTool.Infrastructure;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace BotPlusAutocadTool.Services
@@ -37,7 +40,7 @@ namespace BotPlusAutocadTool.Services
         private static string Environment()
         {
             string version = typeof(PdfPlotterService).Assembly.GetName().Version?.ToString() ?? "";
-            string roaming = Convert.ToString(AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX")) ?? "";
+            string roaming = SystemVariables.GetString("ROAMABLEROOTPREFIX");
             string searchPath = "";
             if (Infrastructure.HostInfo.IsDesktop)
             {
@@ -88,7 +91,7 @@ namespace BotPlusAutocadTool.Services
             var reference = configurations.FirstOrDefault(c =>
                 c.DeviceName.Equals("DWG To PDF.pc3", StringComparison.OrdinalIgnoreCase)) ?? configurations.FirstOrDefault();
             return reference != null ? Path.GetDirectoryName(reference.FullPath) :
-                Path.Combine((string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX"), "Plotters");
+                Path.Combine(SystemVariables.GetString("ROAMABLEROOTPREFIX"), "Plotters");
         }
 
         // Compares the unpacked text: compression runs only when the file really has to be written.

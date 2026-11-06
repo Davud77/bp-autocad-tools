@@ -1,11 +1,12 @@
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.ApplicationServices;
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Windows.Interop;
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.Runtime;
 using BotPlusAutocadTool.Services;
 using BotPlusAutocadTool.ViewModels;
 using BotPlusAutocadTool.Views;
-
 // Псевдоним
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -15,7 +16,6 @@ namespace BotPlusAutocadTool.Commands
     {
         [CommandMethod("ATHANDOFF")]
         [CommandMethod("АТПЕРЕДАЧА")]
-        [CommandMethod("WEAM_CUSTOMERORDER")]
         public void Run()
         {
             var doc = AcadApp.DocumentManager.MdiActiveDocument;
@@ -40,7 +40,7 @@ namespace BotPlusAutocadTool.Commands
             }
             catch (System.Exception ex)
             {
-                doc.Editor.WriteMessage($"\n[WEAM CustomerOrder] Ошибка: {ex}\n");
+                doc.Editor.WriteMessage($"\n[BotPlus AT] Ошибка: {ex}\n");
             }
         }
     }

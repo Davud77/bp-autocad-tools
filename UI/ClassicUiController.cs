@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
-using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Media.Imaging;
@@ -13,10 +14,13 @@ namespace BotPlusAutocadTool.UI
     /// <summary>Desktop ActiveX menus/toolbars share the ribbon command catalog.</summary>
     internal sealed class ClassicUiController : IDisposable
     {
-        internal static string UiName => CommandCatalog.TabTitle + " 1.8.1";
+        // Renamed when the menu macros change: an existing CUI menu with other macros is never rewritten in place.
+        internal static string UiName => CommandCatalog.TabTitle + " 1.10";
         private dynamic _menu, _toolbar;
         private string _workspace;
         private string _disabledWorkspace;
+        private bool? _bitmapsDark;
+        private const int AcToolbarButton = 0;
         internal void Show()
         {
             _workspace = null;
@@ -27,7 +31,7 @@ namespace BotPlusAutocadTool.UI
         internal void RemoveIfPresent()
         {
             if (!HostInfo.IsDesktop) return;
-            string workspace = AcadApp.GetSystemVariable("WSCURRENT")?.ToString() ?? "";
+            string workspace = SystemVariables.GetString("WSCURRENT");
             if (_disabledWorkspace == workspace && _menu == null && _toolbar == null) return;
             dynamic app = AcadApp.AcadApplication;
             dynamic group = app.MenuGroups.Item(0);
@@ -41,7 +45,7 @@ namespace BotPlusAutocadTool.UI
         {
             _disabledWorkspace = null;
             if (!HostInfo.IsDesktop) return;
-            string workspace = AcadApp.GetSystemVariable("WSCURRENT")?.ToString() ?? "";
+            string workspace = SystemVariables.GetString("WSCURRENT");
             if (_menu != null && _toolbar != null && _workspace == workspace) return;
             dynamic app = AcadApp.AcadApplication;
             dynamic group = app.MenuGroups.Item(0);
@@ -71,6 +75,7 @@ namespace BotPlusAutocadTool.UI
             if (_toolbar == null)
             {
                 _toolbar = group.Toolbars.Add(UiName);
+                _bitmapsDark = SystemVariables.IsDarkTheme;
                 _toolbar.Visible = true;
                 foreach (var panel in CommandCatalog.Panels)
                 {
@@ -86,10 +91,12 @@ namespace BotPlusAutocadTool.UI
             }
             // Classic mode replaces the ribbon tab, so the toolbar does not depend on ribbon visibility.
             _toolbar.Visible = true;
+            ApplyTheme();
             _workspace = workspace;
         }
         private static void HideLegacy(dynamic group)
         {
+            HideNamed(group, CommandCatalog.TabTitle + " 1.8.1");
             HideNamed(group, CommandCatalog.TabTitle + " 1.8");
             HideNamed(group, CommandCatalog.TabTitle);
         }
@@ -123,14 +130,36 @@ namespace BotPlusAutocadTool.UI
         }
         internal static string Caption(string title) => title.Replace("\n", " ").Replace("Мульти- копирование", "Мультикопирование");
         internal static string Macro(string command) => "\u0003\u0003" + command + "\r";
-        internal static string GetBitmap(string icon, int size)
+        /// <summary>Re-applies toolbar bitmaps when COLORTHEME or the icon artwork changed.</summary>
+        internal void ApplyTheme()
         {
-            bool dark = Convert.ToInt32(AcadApp.GetSystemVariable("COLORTHEME")) == 0;
-            string directory = Path.Combine(PluginPaths.UserDataDirectory, "UI", "1.8.1", dark ? "dark" : "light", size.ToString());
-            Directory.CreateDirectory(directory);
+            if (_toolbar == null) return;
+            bool dark = SystemVariables.IsDarkTheme;
+            if (_bitmapsDark == dark) return;
+            var iconByMacro = CommandCatalog.Panels.SelectMany(panel => panel.Buttons)
+                .ToDictionary(button => Macro(button.Command), button => button.Icon, StringComparer.Ordinal);
+            for (int i = 0; i < (int)_toolbar.Count; i++)
+            {
+                dynamic item = _toolbar.Item(i);
+                if ((int)item.Type != AcToolbarButton || !iconByMacro.TryGetValue((string)item.Macro, out var icon)) continue;
+                try { item.SetBitmaps(GetBitmap(icon, 16, dark), GetBitmap(icon, 32, dark)); }
+                catch (Exception ex) { PluginLog.Error("Classic toolbar icon " + icon, ex); }
+            }
+            _bitmapsDark = dark;
+        }
+        internal static string GetBitmap(string icon, int size) => GetBitmap(icon, size, SystemVariables.IsDarkTheme);
+        /// <summary>
+        /// ActiveX toolbars take file paths to opaque BMPs, so the PNG is flattened onto the toolbar
+        /// background once and cached per artwork version, theme and size.
+        /// </summary>
+        private static string GetBitmap(string icon, int size, bool dark)
+        {
+            string directory = Path.Combine(PluginPaths.UserDataDirectory, "UI", "Icons " + CommandIcons.ArtworkVersion,
+                CommandIcons.ThemeName(dark), size.ToString(CultureInfo.InvariantCulture));
             string path = Path.Combine(directory, Path.ChangeExtension(icon, ".bmp"));
             if (File.Exists(path)) return path;
-            var source = new BitmapImage(new Uri("pack://application:,,,/" + typeof(ClassicUiController).Assembly.GetName().Name + ";component/Resources/" + icon));
+            Directory.CreateDirectory(directory);
+            var source = new BitmapImage(CommandIcons.PackUri(icon, dark));
             var visual = new System.Windows.Media.DrawingVisual();
             using (var draw = visual.RenderOpen())
             {
@@ -151,6 +180,7 @@ namespace BotPlusAutocadTool.UI
             finally
             {
                 _toolbar = null;
+                _bitmapsDark = null;
                 try
                 {
                     if (_menu != null)

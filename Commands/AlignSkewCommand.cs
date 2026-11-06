@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// See LICENSE in the repository root.
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
-// ============================================================================
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 
 using System;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
-using System.Collections.Generic;
 using BotPlusAutocadTool.Services;
 
 namespace BotPlusAutocadTool.Commands
@@ -34,7 +30,6 @@ namespace BotPlusAutocadTool.Commands
             _transformCalculator = new TransformCalculator();
         }
 
-        [CommandMethod("Align_Den", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("ATISO", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("АТАКСО", CommandFlags.UsePickSet | CommandFlags.Modal)]
         public void ExecuteAlignSkew()
@@ -115,8 +110,6 @@ namespace BotPlusAutocadTool.Commands
                 double angS1S3 = GetAngle2d(s1, s3);
                 double cosB1 = Math.Cos(angS1S3 - angS1S2);
 
-                // ИСПРАВЛЕНИЕ: Тут мы просто проверяем условие и меняем точки,
-                // переменная im больше не нужна.
                 if (Math.Abs(cosB) < 0.01 || Math.Abs(cosB1) < 0.01)
                 {
                     Point3d tempZ = z1; z1 = z3; z3 = tempZ;
@@ -338,9 +331,8 @@ namespace BotPlusAutocadTool.Commands
 
                     if (ent is AttributeDefinition attDef)
                     {
-                        if (atts.ContainsKey(attDef.Tag))
+                        if (atts.TryGetValue(attDef.Tag, out var originalAtt))
                         {
-                            var originalAtt = atts[attDef.Tag];
                             DBText text = new DBText();
                             text.SetDatabaseDefaults();
                             text.Normal = originalAtt.Normal;

@@ -1,10 +1,5 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
-// File: BotPlusAutocadTool/Commands/StripTextCommand.cs
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;

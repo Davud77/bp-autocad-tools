@@ -30,7 +30,7 @@ using (var document = new PdfDocument(new PdfReader(sourcePath)))
         var annotations = document.GetPage(i).GetAnnotations();
         Assert(annotations.Count == 1, "Missing sheet link");
         var action = annotations[0].GetPdfObject().GetAsDictionary(PdfName.A);
-        Assert(action.GetAsString(PdfName.URI).ToUnicodeString() == "https://weam.ru/", "Sheet link must point exactly to the home page");
+        Assert(action.GetAsString(PdfName.URI).ToUnicodeString() == "https://github.com/Davud77/bp-autocad-tools", "Sheet link must point exactly to the home page");
     }
 }
 var binder = System.IO.Path.Combine(directory, "binder.pdf");
@@ -39,7 +39,7 @@ using (var document = new PdfDocument(new PdfReader(binder)))
 {
     for (int i = 1; i <= document.GetNumberOfPages(); i++)
         Assert(document.GetPage(i).GetAnnotations().Single().GetPdfObject().GetAsDictionary(PdfName.A)
-            .GetAsString(PdfName.URI).ToUnicodeString() == "https://weam.ru/", "Binder link changed");
+            .GetAsString(PdfName.URI).ToUnicodeString() == "https://github.com/Davud77/bp-autocad-tools", "Binder link changed");
 }
 var sheets = System.IO.Path.Combine(directory, "sheets");
 PdfPostProcessingService.DeliverPdf(sourcePath, sheets, items, true);
@@ -49,7 +49,7 @@ foreach (var file in Directory.GetFiles(sheets, "*.pdf"))
     using var document = new PdfDocument(new PdfReader(file));
     Assert(document.GetNumberOfPages() == 1 && document.GetPage(1).GetAnnotations().Count == 1, "Single sheet or annotation lost");
     Assert(document.GetPage(1).GetAnnotations().Single().GetPdfObject().GetAsDictionary(PdfName.A)
-        .GetAsString(PdfName.URI).ToUnicodeString() == "https://weam.ru/", "Individual sheet link changed");
+        .GetAsString(PdfName.URI).ToUnicodeString() == "https://github.com/Davud77/bp-autocad-tools", "Individual sheet link changed");
 }
 var originalHash = SHA256.HashData(File.ReadAllBytes(sourcePath));
 var combined = System.IO.Path.Combine(directory, "combined.pdf");

@@ -1,12 +1,8 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
+using System.Collections.ObjectModel;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.ObjectModel;
 using BotPlusAutocadTool.ViewModels;
 
 namespace BotPlusAutocadTool.Models

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright (c) 2026 OOXGN. See LICENSE in the repository root.
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Linq;
 using System.IO;
@@ -15,7 +15,7 @@ using AcadApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 public class Checks
 {
     private const double Tolerance = 1e-6;
-    private static readonly string LogPath = Path.Combine(Environment.GetEnvironmentVariable("BOTPLUS_FORK_CHECK_DIRECTORY"), "results.log");
+    private static readonly string LogPath = Path.Combine(Environment.GetEnvironmentVariable("BOTPLUS_CHECK_DIRECTORY"), "results.log");
 
     [CommandMethod("ALIGN_SKEW_CHECKS")]
     public void Run()

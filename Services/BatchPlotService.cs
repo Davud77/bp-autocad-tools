@@ -1,10 +1,5 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
-// ============================================================================
-
-// File: Services/BatchPlotService.cs
-
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -218,8 +213,8 @@ namespace BotPlusAutocadTool.Services
 
                         // Читаем атрибуты
                         var attrs = GetAttributes(blk, tr);
-                        string sheetVal = attrs.TryGetValue(TagSheetNumber.ToUpper(), out string sheet) ? sheet : "";
-                        string nameVal = attrs.TryGetValue(TagDrawingName.ToUpper(), out string name) ? name : "";
+                        string sheetVal = attrs.TryGetValue(TagSheetNumber, out string sheet) ? sheet : "";
+                        string nameVal = attrs.TryGetValue(TagDrawingName, out string name) ? name : "";
 
                         // Создаём элемент для таблицы
                         var item = new BatchPlotItem
@@ -298,7 +293,7 @@ namespace BotPlusAutocadTool.Services
                             continue;
                         }
 
-                        var blkRef = tr.GetObject(item.BlockId, OpenMode.ForWrite) as BlockReference;
+                        var blkRef = tr.GetObject(item.BlockId, OpenMode.ForRead) as BlockReference;
                         if (blkRef == null || blkRef.AttributeCollection.Count == 0)
                         {
                             skipped++;
@@ -309,15 +304,18 @@ namespace BotPlusAutocadTool.Services
                         {
                             if (attId.IsErased) continue;
 
-                            var attRef = tr.GetObject(attId, OpenMode.ForWrite) as AttributeReference;
+                            var attRef = tr.GetObject(attId, OpenMode.ForRead) as AttributeReference;
                             if (attRef == null) continue;
 
-                            string tag = attRef.Tag.ToUpper();
+                            string value;
+                            if (string.Equals(attRef.Tag, TagDrawingName, StringComparison.OrdinalIgnoreCase)) value = item.Name ?? "";
+                            else if (string.Equals(attRef.Tag, TagSheetNumber, StringComparison.OrdinalIgnoreCase)) value = item.SheetNumber ?? "";
+                            else continue;
 
-                            if (tag == TagDrawingName.ToUpper())
-                                attRef.TextString = item.Name ?? "";
-                            else if (tag == TagSheetNumber.ToUpper())
-                                attRef.TextString = item.SheetNumber ?? "";
+                            // Unchanged attributes stay closed for write: no undo record, no field re-evaluation.
+                            if (string.Equals(attRef.TextString, value, StringComparison.Ordinal)) continue;
+                            attRef.UpgradeOpen();
+                            attRef.TextString = value;
                         }
 
                         count++;
@@ -351,7 +349,7 @@ namespace BotPlusAutocadTool.Services
         #region Вспомогательные методы
 
         /// <summary>
-        /// КЛЮЧЕВОЙ МЕТОД: Определение формата по ЦЕЛЫМ размерам блока (±5мм допуск)
+        /// Определяет формат листа по размерам рамки с допуском ToleranceMm.
         /// Возвращает строку формата ("A3", "A3 v", "A4x6") и определение (для PageSetup)
         /// </summary>
         private string IdentifyFormatBySize(double blockWidth, double blockHeight, out PaperFormatDefinition matchedDefinition)
@@ -400,9 +398,7 @@ namespace BotPlusAutocadTool.Services
                 var att = tr.GetObject(id, OpenMode.ForRead) as AttributeReference;
                 if (att == null) continue;
 
-                string tag = att.Tag;
-                if (!res.ContainsKey(tag))
-                    res.Add(tag, att.TextString);
+                res.TryAdd(att.Tag, att.TextString);
             }
 
             return res;
@@ -425,7 +421,7 @@ namespace BotPlusAutocadTool.Services
         {
             System.Diagnostics.Debug.WriteLine($"[BotPlus AT] {message}");
             var doc = AcadApp.DocumentManager.MdiActiveDocument;
-            doc?.Editor.WriteMessage($"\n[WEAM Log] {message}\n");
+            doc?.Editor.WriteMessage($"\n[BotPlus AT] {message}\n");
         }
 
         #endregion

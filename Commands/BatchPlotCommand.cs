@@ -1,10 +1,5 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
-// ============================================================================
-
-// File: Commands/BatchPlotCommand.cs
-
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Runtime;
@@ -18,7 +13,6 @@ namespace BotPlusAutocadTool.Commands
     {
         [CommandMethod("ATPLOT", CommandFlags.Modal)]
         [CommandMethod("АТПЕЧАТЬ", CommandFlags.Modal)]
-        [CommandMethod("WEAM_BATCHPLOT", CommandFlags.Modal)]
         public void Execute()
         {
             try

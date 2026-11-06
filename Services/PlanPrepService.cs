@@ -1,15 +1,11 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Colors;
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Autodesk.AutoCAD.Colors;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using BotPlusAutocadTool.Models;
 
 namespace BotPlusAutocadTool.Services
@@ -47,13 +43,13 @@ namespace BotPlusAutocadTool.Services
                 workingSet = DeleteSolids(workingSet);
             }
 
-            // 4. Удаление Маскировок (НОВОЕ)
+            // 4. Удаление Маскировок
             if (_options.DeleteWipeouts)
             {
                 workingSet = DeleteWipeouts(workingSet);
             }
 
-            // 5. Удаление Точек (НОВОЕ)
+            // 5. Удаление Точек
             if (_options.DeletePoints)
             {
                 workingSet = DeletePoints(workingSet);
@@ -189,7 +185,7 @@ namespace BotPlusAutocadTool.Services
 
         private bool IsSolid(Hatch hatch)
         {
-            return hatch.PatternName.Equals("SOLID", StringComparison.InvariantCultureIgnoreCase);
+            return hatch.PatternName.Equals("SOLID", StringComparison.OrdinalIgnoreCase);
         }
 
         // --- 4. Удаление Маскировок (Wipeout) ---
@@ -381,7 +377,7 @@ namespace BotPlusAutocadTool.Services
 
             Point3d center = _basePoint ?? (hasExt ? ext.MinPoint + (ext.MaxPoint - ext.MinPoint) / 2.0 : Point3d.Origin);
 
-            string blkName = "PLAN_PREP_" + DateTime.Now.ToString("yyyyMMdd_HHmmss_fffffff");
+            string blkName = "PLAN_PREP_" + DateTime.Now.ToString("yyyyMMdd_HHmmss_fffffff", System.Globalization.CultureInfo.InvariantCulture);
             BlockTable bt = (BlockTable)_tr.GetObject(_db.BlockTableId, OpenMode.ForWrite);
 
             using (BlockTableRecord btr = new BlockTableRecord())

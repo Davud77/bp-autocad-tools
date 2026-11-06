@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
-using System.IO;
-using System.Text;
-using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 using Autodesk.AutoCAD.PlottingServices;
 
 namespace BotPlusAutocadTool.Services

@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using BotPlusAutocadTool.Infrastructure;
 
 namespace BotPlusAutocadTool.UI
 {
@@ -23,8 +24,8 @@ namespace BotPlusAutocadTool.UI
         }
         public static void Apply(Window window)
         {
-            bool dark = true;
-            try { dark = Convert.ToInt32(AcadApp.GetSystemVariable("COLORTHEME")) == 0; } catch { }
+
+            bool dark = SystemVariables.IsDarkTheme;
             var keys = new[] { "WindowBackground", "ControlBackground", "ControlBorder", "TextPrimary", "TextSecondary", "AccentColor", "HoverBackground", "SelectionBackground" };
             var colors = dark
                 ? new[] { "#2B3440", "#3B4453", "#606B7C", "#F0F2F5", "#BBC4D0", "#22A7DD", "#4B596D", "#087EAF" }

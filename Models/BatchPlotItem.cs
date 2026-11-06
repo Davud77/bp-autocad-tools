@@ -1,10 +1,5 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
-// ============================================================================
-
-// File: Models/BatchPlotItem.cs
-
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -40,7 +35,7 @@ namespace BotPlusAutocadTool.Models
         public Extents3d Extents { get; set; }
 
         /// <summary>
-        /// НОВОЕ: Определение формата (ТОЧНЫЕ размеры по ГОСТ) для использования в PageSetup
+        /// Определение формата (ТОЧНЫЕ размеры по ГОСТ) для использования в PageSetup
         /// </summary>
         public PaperFormatDefinition FormatDefinition { get; set; }
         public int PlotScale { get; set; } = 1;
@@ -77,7 +72,7 @@ namespace BotPlusAutocadTool.Models
             get => _name;
             set
             {
-                // ИСПРАВЛЕНИЕ: Валидация и очистка имени файла
+                // Валидация и очистка имени файла
                 if (value != _name)
                 {
                     _name = CleanFileName(value);
@@ -110,7 +105,7 @@ namespace BotPlusAutocadTool.Models
             get => _format;
             set
             {
-                // ИСПРАВЛЕНИЕ: Защита от пустых значений
+                // Защита от пустых значений
                 if (!string.IsNullOrWhiteSpace(value) && value != _format)
                 {
                     _format = value;
@@ -156,7 +151,7 @@ namespace BotPlusAutocadTool.Models
             // Удаление лишних пробелов и точек в начале/конце
             cleanedName = cleanedName.Trim().Trim('.');
 
-            // НОВОЕ: Ограничение длины имени (Windows limit)
+            // Ограничение длины имени (Windows limit)
             if (cleanedName.Length > 100)
                 cleanedName = cleanedName.Substring(0, 100);
 

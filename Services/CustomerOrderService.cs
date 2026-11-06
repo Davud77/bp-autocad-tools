@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using BotPlusAutocadTool.Models;
 
 namespace BotPlusAutocadTool.Services
@@ -53,13 +55,13 @@ namespace BotPlusAutocadTool.Services
 
                 tr.Commit();
 
-                ed.WriteMessage($"\n[WEAM CustomerOrder] Готово. Blocks exploded: {explodedBlocks}, Polylines exploded: {explodedPolylines}, Text exploded: {explodedText}\n");
+                ed.WriteMessage($"\n[BotPlus AT] Готово. Blocks exploded: {explodedBlocks}, Polylines exploded: {explodedPolylines}, Text exploded: {explodedText}\n");
             }
 
             if (options.BlockCopy)
             {
                 CopyProtectionService.Enable(doc);
-                doc.Editor.WriteMessage("\n[WEAM CustomerOrder] Защита от копирования включена для текущего документа.\n");
+                doc.Editor.WriteMessage("\n[BotPlus AT] Защита от копирования включена для текущего документа.\n");
             }
         }
 
@@ -72,7 +74,7 @@ namespace BotPlusAutocadTool.Services
 
             using (originalDoc.LockDocument())
             {
-                ed.WriteMessage($"\n[WEAM CustomerOrder] SaveCopy -> {newPath}\n");
+                ed.WriteMessage($"\n[BotPlus AT] SaveCopy -> {newPath}\n");
                 originalDb.SaveAs(newPath, false, DwgVersion.Current, originalDb.SecurityParameters);
             }
 
@@ -107,12 +109,12 @@ namespace BotPlusAutocadTool.Services
 
                 workDb.SaveAs(newPath, DwgVersion.Current);
 
-                ed.WriteMessage($"\n[WEAM CustomerOrder] Готово (в копии). Blocks exploded: {explodedBlocks}, Polylines exploded: {explodedPolylines}, Text exploded: {explodedText}\n");
+                ed.WriteMessage($"\n[BotPlus AT] Готово (в копии). Blocks exploded: {explodedBlocks}, Polylines exploded: {explodedPolylines}, Text exploded: {explodedText}\n");
             }
 
             if (options.BlockCopy)
             {
-                ed.WriteMessage("\n[WEAM CustomerOrder] ВНИМАНИЕ: 'Запретить копирование' работает только в открытом документе текущей сессии, а не как защита файла.\n");
+                ed.WriteMessage("\n[BotPlus AT] ВНИМАНИЕ: 'Запретить копирование' работает только в открытом документе текущей сессии, а не как защита файла.\n");
             }
         }
 
@@ -158,7 +160,7 @@ namespace BotPlusAutocadTool.Services
                 }
             }
 
-            ed.WriteMessage($"\n[WEAM CustomerOrder] Text explode (MTEXT->DBText) обработано: {count}\n");
+            ed.WriteMessage($"\n[BotPlus AT] Text explode (MTEXT->DBText) обработано: {count}\n");
             return count;
         }
 
@@ -214,7 +216,7 @@ namespace BotPlusAutocadTool.Services
             }
             catch (System.Exception ex)
             {
-                ed.WriteMessage($"\n[WEAM CustomerOrder] ConvertMTextToDBText failed (Handle={mtext.Handle}). Причина: {ex.Message}\n");
+                ed.WriteMessage($"\n[BotPlus AT] ConvertMTextToDBText failed (Handle={mtext.Handle}). Причина: {ex.Message}\n");
                 return false;
             }
         }
@@ -297,11 +299,11 @@ namespace BotPlusAutocadTool.Services
                     var blockRefs = CollectAllBlockRefsInSpace(btrId, tr);
                     if (blockRefs.Count == 0)
                     {
-                        ed.WriteMessage($"\n[WEAM CustomerOrder] BTR={btrId.Handle}, pass={pass}: нет блоков для взрыва.\n");
+                        ed.WriteMessage($"\n[BotPlus AT] BTR={btrId.Handle}, pass={pass}: нет блоков для взрыва.\n");
                         break;
                     }
 
-                    ed.WriteMessage($"\n[WEAM CustomerOrder] BTR={btrId.Handle}, pass={pass}: найдено BlockReference={blockRefs.Count}\n");
+                    ed.WriteMessage($"\n[BotPlus AT] BTR={btrId.Handle}, pass={pass}: найдено BlockReference={blockRefs.Count}\n");
 
                     int explodedInPass = 0;
 
@@ -319,19 +321,19 @@ namespace BotPlusAutocadTool.Services
                         }
                         catch (System.Exception ex)
                         {
-                            ed.WriteMessage($"\n[WEAM CustomerOrder] Не удалось взорвать BlockRef={brId.Handle}. Причина: {ex.Message}\n");
+                            ed.WriteMessage($"\n[BotPlus AT] Не удалось взорвать BlockRef={brId.Handle}. Причина: {ex.Message}\n");
                         }
                     }
 
                     totalExploded += explodedInPass;
-                    ed.WriteMessage($"\n[WEAM CustomerOrder] BTR={btrId.Handle}, pass={pass}: взорвано={explodedInPass}\n");
+                    ed.WriteMessage($"\n[BotPlus AT] BTR={btrId.Handle}, pass={pass}: взорвано={explodedInPass}\n");
 
                     if (explodedInPass == 0)
                         break;
                 }
 
                 if (pass >= passMax)
-                    ed.WriteMessage($"\n[WEAM CustomerOrder] ВНИМАНИЕ: достигнут лимит проходов по взрыву блоков для BTR={btrId.Handle}. Возможна рекурсия/зацикливание.\n");
+                    ed.WriteMessage($"\n[BotPlus AT] ВНИМАНИЕ: достигнут лимит проходов по взрыву блоков для BTR={btrId.Handle}. Возможна рекурсия/зацикливание.\n");
             }
 
             return totalExploded;
@@ -369,7 +371,7 @@ namespace BotPlusAutocadTool.Services
             }
             catch (System.Exception ex)
             {
-                ed.WriteMessage($"\n[WEAM CustomerOrder] Не удалось снять запрет Explodable у определения блока (BTR={btrId.Handle}). Причина: {ex.Message}\n");
+                ed.WriteMessage($"\n[BotPlus AT] Не удалось снять запрет Explodable у определения блока (BTR={btrId.Handle}). Причина: {ex.Message}\n");
             }
         }
 
@@ -407,7 +409,7 @@ namespace BotPlusAutocadTool.Services
                 int removedAttDef = RemoveAttributeDefinitionsFromAppended(appended, tr);
 
                 if (removedAttDef > 0)
-                    ed.WriteMessage($"\n[WEAM CustomerOrder] Удалено AttributeDefinition (тегов): {removedAttDef}\n");
+                    ed.WriteMessage($"\n[BotPlus AT] Удалено AttributeDefinition (тегов): {removedAttDef}\n");
 
                 // Рекурсивно взрываем вложенные блоки
                 foreach (var id in appended)
@@ -427,7 +429,7 @@ namespace BotPlusAutocadTool.Services
             catch (System.Exception ex)
             {
                 try { db.ObjectAppended -= handler; } catch { }
-                ed.WriteMessage($"\n[WEAM CustomerOrder] Explode failed for Handle={br.Handle}. Причина: {ex.Message}\n");
+                ed.WriteMessage($"\n[BotPlus AT] Explode failed for Handle={br.Handle}. Причина: {ex.Message}\n");
                 return 0;
             }
         }
@@ -521,7 +523,7 @@ namespace BotPlusAutocadTool.Services
                 }
                 catch (System.Exception ex)
                 {
-                    ed.WriteMessage($"\n[WEAM CustomerOrder] BurstAttributes: ошибка атрибута блока Handle={br.Handle}. Причина: {ex.Message}\n");
+                    ed.WriteMessage($"\n[BotPlus AT] BurstAttributes: ошибка атрибута блока Handle={br.Handle}. Причина: {ex.Message}\n");
                 }
             }
         }
@@ -587,7 +589,7 @@ namespace BotPlusAutocadTool.Services
             }
             catch (System.Exception ex)
             {
-                ed.WriteMessage($"\n[WEAM CustomerOrder] Explode entity failed (Handle={ent.Handle}). Причина: {ex.Message}\n");
+                ed.WriteMessage($"\n[BotPlus AT] Explode entity failed (Handle={ent.Handle}). Причина: {ex.Message}\n");
                 return false;
             }
         }
@@ -609,7 +611,7 @@ namespace BotPlusAutocadTool.Services
                 db.Purge(ids);
                 if (ids.Count == 0)
                 {
-                    ed.WriteMessage($"\n[WEAM CustomerOrder] Purge: pass={pass}, candidate={before}, purged=0\n");
+                    ed.WriteMessage($"\n[BotPlus AT] Purge: pass={pass}, candidate={before}, purged=0\n");
                     break;
                 }
 
@@ -629,13 +631,13 @@ namespace BotPlusAutocadTool.Services
                 }
 
                 erasedTotal += erased;
-                ed.WriteMessage($"\n[WEAM CustomerOrder] Purge: pass={pass}, candidate={before}, purged={ids.Count}, erased={erased}\n");
+                ed.WriteMessage($"\n[BotPlus AT] Purge: pass={pass}, candidate={before}, purged={ids.Count}, erased={erased}\n");
 
                 if (erased == 0) break;
                 if (pass > 10) break;
             }
 
-            ed.WriteMessage($"\n[WEAM CustomerOrder] Purge total erased: {erasedTotal}\n");
+            ed.WriteMessage($"\n[BotPlus AT] Purge total erased: {erasedTotal}\n");
         }
 
         private static ObjectIdCollection CollectPurgableCandidateIds(Database db, Transaction tr)
@@ -672,7 +674,7 @@ namespace BotPlusAutocadTool.Services
                         total++;
                 }
             }
-            ed.WriteMessage($"\n[WEAM CustomerOrder] Осталось BlockReference в пространствах: {total}\n");
+            ed.WriteMessage($"\n[BotPlus AT] Осталось BlockReference в пространствах: {total}\n");
         }
 
         private static IEnumerable<ObjectId> GetLayoutBtrs_NoDuplicates(Database db, Transaction tr)

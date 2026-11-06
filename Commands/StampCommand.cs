@@ -1,9 +1,5 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Windows.Interop; // Необходимо для связи WPF окна с окном AutoCAD
 using Autodesk.AutoCAD.Runtime;
@@ -23,7 +19,6 @@ namespace BotPlusAutocadTool.Commands
 
         [CommandMethod("ATSTAMP", CommandFlags.Session)]
         [CommandMethod("АТШТАМП", CommandFlags.Session)]
-        [CommandMethod("WEAM_STAMP", CommandFlags.Session)]
         // CommandFlags.Session важно для Modeless Window
         public void ShowStampWindow()
         {
@@ -43,9 +38,7 @@ namespace BotPlusAutocadTool.Commands
 
             _stampWindow = new StampWindow(viewModel);
 
-            // --- ИСПРАВЛЕНИЕ CS0117 ---
-            // Правильная привязка владельца окна (Owner) к основному окну AutoCAD
-            // Это позволяет окну сворачиваться вместе с CAD и всегда быть поверх него
+            // Окно принадлежит главному окну AutoCAD: сворачивается вместе с ним и остаётся поверх.
             if (AcadApp.MainWindow != null)
             {
                 var helper = new WindowInteropHelper(_stampWindow);

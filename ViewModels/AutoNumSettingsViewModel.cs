@@ -1,11 +1,8 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -106,7 +103,7 @@ namespace BotPlusAutocadTool.ViewModels
 
         public string StartNumberText
         {
-            get => _startNumberText ?? (_settings?.StartNumber.ToString() ?? "1");
+            get => _startNumberText ?? (_settings?.StartNumber.ToString(CultureInfo.InvariantCulture) ?? "1");
             set
             {
                 if (!SetProperty(ref _startNumberText, value)) return;
@@ -122,7 +119,7 @@ namespace BotPlusAutocadTool.ViewModels
             {
                 if (_settings == null || _settings.StartNumber == value) return;
                 _settings.StartNumber = value;
-                _startNumberText = value.ToString();
+                _startNumberText = value.ToString(CultureInfo.InvariantCulture);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(StartNumberText));
                 OnPropertyChanged(nameof(PreviewItems));
@@ -131,7 +128,7 @@ namespace BotPlusAutocadTool.ViewModels
 
         public string StepText
         {
-            get => _stepText ?? (_settings?.Step.ToString() ?? "1");
+            get => _stepText ?? (_settings?.Step.ToString(CultureInfo.InvariantCulture) ?? "1");
             set
             {
                 if (!SetProperty(ref _stepText, value)) return;
@@ -147,7 +144,7 @@ namespace BotPlusAutocadTool.ViewModels
             {
                 if (_settings == null || _settings.Step == value) return;
                 _settings.Step = value;
-                _stepText = value.ToString();
+                _stepText = value.ToString(CultureInfo.InvariantCulture);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(StepText));
                 OnPropertyChanged(nameof(PreviewItems));
@@ -156,7 +153,7 @@ namespace BotPlusAutocadTool.ViewModels
 
         public string DigitsText
         {
-            get => _digitsText ?? (_settings?.Digits.ToString() ?? "0");
+            get => _digitsText ?? (_settings?.Digits.ToString(CultureInfo.InvariantCulture) ?? "0");
             set
             {
                 if (!SetProperty(ref _digitsText, value)) return;
@@ -172,7 +169,7 @@ namespace BotPlusAutocadTool.ViewModels
             {
                 if (_settings == null || _settings.Digits == value) return;
                 _settings.Digits = value;
-                _digitsText = value.ToString();
+                _digitsText = value.ToString(CultureInfo.InvariantCulture);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(DigitsText));
                 OnPropertyChanged(nameof(PreviewItems));
@@ -280,8 +277,8 @@ namespace BotPlusAutocadTool.ViewModels
         public int TableRow { get => _settings.TableRow; set { _settings.TableRow = value; OnPropertyChanged(); } }
         public int TableColumn { get => _settings.TableColumn; set { _settings.TableColumn = value; OnPropertyChanged(); } }
         private string _tableRowText, _tableColumnText;
-        public string TableRowText { get => _tableRowText ?? TableRow.ToString(); set => SetProperty(ref _tableRowText, value); }
-        public string TableColumnText { get => _tableColumnText ?? TableColumn.ToString(); set => SetProperty(ref _tableColumnText, value); }
+        public string TableRowText { get => _tableRowText ?? TableRow.ToString(CultureInfo.InvariantCulture); set => SetProperty(ref _tableRowText, value); }
+        public string TableColumnText { get => _tableColumnText ?? TableColumn.ToString(CultureInfo.InvariantCulture); set => SetProperty(ref _tableColumnText, value); }
         public bool IsSortingMode => Order == AutoNumSettings.NumberingOrder.Geometric;
 
         public System.Windows.Visibility IsAttributeModeVisibility => IsAttributeMode ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
@@ -322,17 +319,18 @@ namespace BotPlusAutocadTool.ViewModels
 
         private void ExecuteOk(object parameter)
         {
-            if (!int.TryParse(StartNumberText, out _) || !int.TryParse(StepText, out var step) || step == 0 ||
+            if (!int.TryParse(StartNumberText, out var start) || !int.TryParse(StepText, out var step) || step == 0 ||
                 !int.TryParse(DigitsText, out var digits) || digits < 0 || digits > 16 ||
                 !int.TryParse(TableRowText, out var row) || row < 1 || !int.TryParse(TableColumnText, out var column) || column < 1)
             {
                 System.Windows.MessageBox.Show("Введите целые числа. Шаг не равен нулю, количество знаков — от 0 до 16, строка и столбец — от 1.", "Автонумерация");
                 return;
             }
-            _settings.StartNumber = int.Parse(StartNumberText);
+            _settings.StartNumber = start;
             _settings.Step = step;
+            _settings.Digits = digits;
             _settings.TableRow = row; _settings.TableColumn = column;
-            _settings?.Save();
+            _settings.Save();
             DialogResult = true;
         }
 

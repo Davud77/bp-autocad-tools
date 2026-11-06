@@ -1,9 +1,5 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Globalization;
 using System.Windows.Data;
@@ -20,8 +16,6 @@ namespace BotPlusAutocadTool.ViewModels
             // value - это сам ViewModel (через {Binding .})
             if (value is StampPropsViewModel viewModel && parameter is string key)
             {
-                // --- ИСПРАВЛЕНИЕ CS1061 ---
-                // Используем FieldsMap вместо старого метода GetFieldByKey
                 if (viewModel.FieldsMap != null && viewModel.FieldsMap.TryGetValue(key, out var field))
                 {
                     return field.Value ?? string.Empty;

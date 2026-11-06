@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright (c) 2026 OOXGN. See LICENSE in the repository root.
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.IO;
-using Newtonsoft.Json;
 using System.Windows.Media.Imaging;
 using BotPlusAutocadTool.ViewModels;
+using Newtonsoft.Json;
 
 namespace BotPlusAutocadTool.Models
 {

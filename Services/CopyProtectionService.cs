@@ -1,8 +1,9 @@
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.Runtime;
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
-
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.Runtime;
 // Core.Application, чтобы не ловить неоднозначность
 using AcadCoreApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
@@ -25,7 +26,7 @@ namespace BotPlusAutocadTool.Services
         private static readonly Dictionary<Document, CommandEventHandler> _handlers = new();
         private static bool _docDestroyHooked;
 
-        public static void Enable(Document doc, string message = "weam.ru. копирование запрещено")
+        public static void Enable(Document doc, string message = "BotPlus AT: копирование запрещено")
         {
             if (doc == null) return;
             if (_handlers.ContainsKey(doc)) return;

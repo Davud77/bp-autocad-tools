@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 namespace BotPlusAutocadTool.UI
 {
     internal sealed record ButtonDefinition(string Title, string Icon, string Command, string Description);
@@ -18,7 +19,7 @@ namespace BotPlusAutocadTool.UI
         {
             new("Инструменты", new[]
             {
-                new ButtonDefinition("Аксонометрия", "axon.png", "Align_Den", "Преобразовать выбранные объекты в аксонометрическую проекцию."),
+                new ButtonDefinition("Аксонометрия", "axon.png", "ATISO", "Преобразовать выбранные объекты в аксонометрическую проекцию."),
                 new ButtonDefinition("Автонумерация", "autonum.png", "AUTONUM", "Пронумеровать текст, атрибуты или выноски в выбранном порядке."),
                 new ButtonDefinition("Выбор по\nобразцу", "selectsim.png", "WSELECT", "Найти объекты по свойствам выбранного образца."),
                 new ButtonDefinition("Сумма\nдлин", "sumlen.png", "SUMLENGTH", "Длина, площадь и состав выделения с настройками единиц и масштаба."),
@@ -35,7 +36,7 @@ namespace BotPlusAutocadTool.UI
             }),
             new("Таблицы", new[]
             {
-                new ButtonDefinition("Таблица\nExcel", "tableedit.png", "WEAM_TABLEEXCEL", "Отредактировать таблицу в XLSX и вернуть изменения в чертёж."),
+                new ButtonDefinition("Таблица\nExcel", "tableedit.png", "ATEXCEL", "Отредактировать таблицу в XLSX и вернуть изменения в чертёж."),
                 new ButtonDefinition("Экспорт\nExcel", "excel_export.png", "BOTPLUS_EXPORTEXCEL", "Сохранить выбранную TABLE в XLSX."),
                 new ButtonDefinition("Импорт\nExcel", "excel_import.png", "BOTPLUS_IMPORTEXCEL", "Создать TABLE из XLSX или обновить существующую таблицу."),
                 new ButtonDefinition("Очистить стиль\nтаблиц", "table_reset.png", "BOTPLUS_CLEARTABLESTYLE", "Снять локальное оформление ячеек и текста в выбранных TABLE, применив текущий стиль каждой таблицы.")
@@ -48,15 +49,15 @@ namespace BotPlusAutocadTool.UI
             }),
             new("Выпуск", new[]
             {
-                new ButtonDefinition("Штамп", "stamp.png", "WEAM_STAMP", "Заполнить пользовательские свойства чертежа для штампа."),
+                new ButtonDefinition("Штамп", "stamp.png", "ATSTAMP", "Заполнить пользовательские свойства чертежа для штампа."),
                 new ButtonDefinition("Вставить\nформатку", "frame.png", "BOTPLUS_INSERTFORMAT", "Вставить динамический блок WM_FORMAT с атрибутами."),
-                new ButtonDefinition("Печать", "wplot.png", "WEAM_BATCHPLOT", "Выбрать форматки и выпустить PDF со сшивкой или по листам."),
-                new ButtonDefinition("Сформировать\nзаказчику", "dwgexport.png", "WEAM_CUSTOMERORDER", "Подготовить чертёж или отдельную копию для передачи заказчику.")
+                new ButtonDefinition("Печать", "wplot.png", "ATPLOT", "Выбрать форматки и выпустить PDF со сшивкой или по листам."),
+                new ButtonDefinition("Сформировать\nзаказчику", "dwgexport.png", "ATHANDOFF", "Подготовить чертёж или отдельную копию для передачи заказчику.")
             }),
             new("Сервис", new[]
             {
                 new ButtonDefinition("Команды и\nсокращения", "aliases.png", "ATALIASES", "Поиск команд и настройка личных сокращений в acad.pgp."),
-                new ButtonDefinition("Сервис", "info.png", "WEAM_INFO", "Настройки, проверка обновлений и справка о плагине.")
+                new ButtonDefinition("Сервис", "info.png", "ATINFO", "Настройки, проверка обновлений и справка о плагине.")
             })
         };
     }

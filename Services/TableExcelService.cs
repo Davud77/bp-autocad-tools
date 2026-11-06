@@ -1,14 +1,12 @@
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-
-
-
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using AcadCoreApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace BotPlusAutocadTool.Services

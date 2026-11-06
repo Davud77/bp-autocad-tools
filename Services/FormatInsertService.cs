@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 // Derived from Davud77/bp-autocad-tools (51e3e82). See THIRD-PARTY-NOTICES.md.
 using System;
 using System.IO;
@@ -95,7 +96,7 @@ namespace BotPlusAutocadTool.Services
                     {
                         var sourceField = (Field)transaction.GetObject(attribute.GetField(), OpenMode.ForRead);
                         code = sourceField.GetFieldCode(FieldCodeFlags.AddMarkers);
-                        code = code.Replace("?BlockRefId", @"%<\_ObjId " + block.ObjectId.OldIdPtr.ToString() + ">%", StringComparison.Ordinal);
+                        code = code.Replace("?BlockRefId", @"%<\_ObjId " + block.ObjectId.OldIdPtr.ToInt64().ToString(System.Globalization.CultureInfo.InvariantCulture) + ">%", StringComparison.Ordinal);
                     }
                     else if (attribute.Tag.StartsWith("ДОЛЖНОСТЬ", StringComparison.OrdinalIgnoreCase) && int.TryParse(attribute.Tag.Substring(9), out int role) && role >= 1 && role <= 6)
                         code = @"%<\AcVar CustomDP.Должн." + role + ">%";

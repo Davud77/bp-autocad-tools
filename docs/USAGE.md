@@ -2,8 +2,6 @@
 
 [← Главная страница](../README.md)
 
-Автор исходного руководства и перенесённых инструментов: OOXGN (OOXGN-OOX), [AutocadTools](https://github.com/OOXGN-OOX/AutocadTools), версия исходников `f662abe`. Руководство адаптировано для bp-autocad-tools. Код и документация перенесены под AGPLv3 с разрешения автора, подтверждённого владельцем проекта 02.11.2026.
-
 ## Инструменты и команды
 
 | Инструмент | English | Русский | Возможности |
@@ -38,7 +36,7 @@
 
 Английские имена начинаются с `AT`, русские — с `АТ`. Каждое имя набирается целиком в одной раскладке. Для макросов и сценариев используйте полное английское имя.
 
-Прежние команды (`Align_Den`, `AUTONUM`, `НУМ`, `WSELECT`, `SUMLENGTH`, `MULTICOPY`, `PLANPREP`, `CLEANDWG`, `CLEANUNSELECTED`, `STRIPTEXT`, `WEAM_STAMP`, `WEAM_BATCHPLOT`, `WPLOT`, `WEAM_CUSTOMERORDER`, `WEAM_TABLEEXCEL`, `WEAM_INFO` и все `BOTPLUS_*`) сохранены. Очистка стиля TABLE: `BOTPLUS_CLEARTABLESTYLE` / `БПСТИЛЬТАБЛИЦ`. Всего зарегистрировано 77 имён команд.
+Прежние команды (`ATISO`, `AUTONUM`, `НУМ`, `WSELECT`, `SUMLENGTH`, `MULTICOPY`, `PLANPREP`, `CLEANDWG`, `CLEANUNSELECTED`, `STRIPTEXT`, `ATSTAMP`, `ATPLOT`, `WPLOT`, `ATHANDOFF`, `ATEXCEL`, `ATINFO` и все `BOTPLUS_*`) сохранены. Очистка стиля TABLE: `BOTPLUS_CLEARTABLESTYLE` / `БПСТИЛЬТАБЛИЦ`. Всего зарегистрировано 77 имён команд.
 
 ## Классический интерфейс
 
@@ -147,7 +145,7 @@
 
 ## Проверка обновлений
 
-Плагин проверяет [GitHub Releases](https://github.com/OOXGN-OOX/BotPlusAutocadTool/releases) при запуске и каждые 24 часа работы AutoCAD. Ручная проверка доступна через кнопку «Проверить обновления» и команду `ATUPDATE`.
+Плагин проверяет [GitHub Releases](https://github.com/Davud77/bp-autocad-tools/releases) при запуске и каждые 24 часа работы AutoCAD. Ручная проверка доступна через кнопку «Проверить обновления» и команду `ATUPDATE`.
 
 При включённом автообновлении установщик скачивается в фоне и проверяется по SHA256. Установка начинается после закрытия всех процессов AutoCAD и Core Console. Область установки сохраняется: текущий пользователь или все пользователи. Общая установка требует подтверждения прав Windows. После установки новая версия загружается при следующем запуске AutoCAD.
 

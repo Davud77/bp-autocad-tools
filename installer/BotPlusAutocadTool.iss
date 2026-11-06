@@ -16,7 +16,7 @@
 AppId={{98BED5F2-3CAB-47DD-8344-E681FEA048DB}
 AppName=BotPlusAutocadTool
 AppVersion={#AppVersion}
-AppPublisher=OOXGN
+AppPublisher=BotPlus
 AppPublisherURL=https://github.com/Davud77/bp-autocad-tools
 AppSupportURL=https://github.com/Davud77/bp-autocad-tools/issues
 AppUpdatesURL=https://github.com/Davud77/bp-autocad-tools/releases
@@ -58,15 +58,17 @@ Source: "{#BundleDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs 
 Source: "{#ProjectDir}\README.md"; DestDir: "{app}\Documentation"; Flags: ignoreversion
 Source: "{#ProjectDir}\LICENSE"; DestDir: "{app}\Documentation"; Flags: ignoreversion
 Source: "{#ProjectDir}\THIRD-PARTY-NOTICES.md"; DestDir: "{app}\Documentation"; Flags: ignoreversion
+Source: "{#ProjectDir}\docs\USAGE-1.10.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
+Source: "{#ProjectDir}\docs\RELEASE-1.10.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\USAGE-1.9.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\RELEASE-1.9.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\ROADMAP.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\USAGE-1.8.1.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\USAGE-1.8.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\USAGE.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
-Source: "{#ProjectDir}\docs\FORK-INTEGRATION.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\RELEASE-1.8.0.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\assets\ribbon.png"; DestDir: "{app}\Documentation\docs\assets"; Flags: ignoreversion
+Source: "{#ProjectDir}\docs\assets\icons.png"; DestDir: "{app}\Documentation\docs\assets"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\VALIDATION.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\PRINTING-FORMATS.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\ARCHITECTURE.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
@@ -79,7 +81,6 @@ Source: "{#ProjectDir}\docs\USAGE-1.5.md"; DestDir: "{app}\Documentation\docs"; 
 Source: "{#ProjectDir}\docs\USAGE-1.6.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\USAGE-1.7.1.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\docs\UPDATE-VALIDATION.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
-Source: "{#ProjectDir}\docs\MERGE-NOTES.md"; DestDir: "{app}\Documentation\docs"; Flags: ignoreversion
 Source: "{#ProjectDir}\scripts\Get-LoadDiagnostics.ps1"; DestDir: "{app}\Documentation"; Flags: ignoreversion
 
 [Code]

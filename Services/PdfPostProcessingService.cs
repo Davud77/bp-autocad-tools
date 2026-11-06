@@ -1,26 +1,20 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
-// ============================================================================
-
-// File: Services/PdfPostProcessingService.cs
-
-using Autodesk.AutoCAD.EditorInput;
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Autodesk.AutoCAD.EditorInput;
 using BotPlusAutocadTool.Models;
-
 // aliases (должны быть тут, до namespace)
 using IOPath = System.IO.Path;
-using ITextPdfReader = iText.Kernel.Pdf.PdfReader;
-using ITextPdfWriter = iText.Kernel.Pdf.PdfWriter;
-using ITextPdfDocument = iText.Kernel.Pdf.PdfDocument;
-using ITextPdfPage = iText.Kernel.Pdf.PdfPage;
-using ITextRect = iText.Kernel.Geom.Rectangle;
-using ITextPdfLinkAnnotation = iText.Kernel.Pdf.Annot.PdfLinkAnnotation;
 using ITextPdfAction = iText.Kernel.Pdf.Action.PdfAction;
 using ITextPdfArray = iText.Kernel.Pdf.PdfArray;
+using ITextPdfDocument = iText.Kernel.Pdf.PdfDocument;
+using ITextPdfLinkAnnotation = iText.Kernel.Pdf.Annot.PdfLinkAnnotation;
+using ITextPdfPage = iText.Kernel.Pdf.PdfPage;
+using ITextPdfReader = iText.Kernel.Pdf.PdfReader;
+using ITextPdfWriter = iText.Kernel.Pdf.PdfWriter;
+using ITextRect = iText.Kernel.Geom.Rectangle;
 
 namespace BotPlusAutocadTool.Services
 {
@@ -31,7 +25,7 @@ namespace BotPlusAutocadTool.Services
     /// </summary>
     public static class PdfPostProcessingService
     {
-        private const string HomePageUrl = "https://weam.ru/";
+        private const string HomePageUrl = "https://github.com/Davud77/bp-autocad-tools";
 
         /// <summary>
         /// Важно: itemsInDsdOrder должен быть в том же порядке, что и страницы в итоговом PDF.

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// See LICENSE in the repository root.
-// Copyright (c) 2026 OOXGN. All rights reserved.
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 
 using System;
 using Autodesk.AutoCAD.DatabaseServices;

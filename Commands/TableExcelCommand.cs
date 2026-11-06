@@ -1,10 +1,11 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
+using System;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
-using System;
 using BotPlusAutocadTool.Services;
-
 // Core.Application
 using AcadCoreApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
@@ -14,7 +15,6 @@ namespace BotPlusAutocadTool.Commands
     {
         [CommandMethod("ATEXCEL", CommandFlags.UsePickSet | CommandFlags.Modal)]
         [CommandMethod("АТЭКСЕЛЬ", CommandFlags.UsePickSet | CommandFlags.Modal)]
-        [CommandMethod("WEAM_TABLEEXCEL")]
         public void Run()
         {
             var doc = AcadCoreApp.DocumentManager.MdiActiveDocument;
@@ -36,7 +36,7 @@ namespace BotPlusAutocadTool.Commands
             }
             catch (System.Exception ex)
             {
-                ed.WriteMessage($"\n[WEAM TableExcel] Ошибка: {ex}\n");
+                ed.WriteMessage($"\n[BotPlus AT] Ошибка: {ex}\n");
             }
         }
     }

@@ -1,18 +1,52 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
-using Microsoft.Win32; // Для работы с Registry
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
+using System;
+using System.Linq;
 using System.Windows.Input;
+using BotPlusAutocadTool.Infrastructure;
 using BotPlusAutocadTool.Models;
+using Microsoft.Win32;
 
 namespace BotPlusAutocadTool.ViewModels
 {
     public class StripTextViewModel : BaseViewModel
     {
+        // Same key and flag letters as the StripMtext LISP routine, so both share the last choice.
+        private const string RegistryKey = @"Software\StripMtext";
+        private const string FlagsValue = "Settings";
+        private const string RememberValue = "Save";
+
+        private static readonly (char Flag, Func<StripTextOptions, bool> Get, Action<StripTextOptions, bool> Set)[] Flags =
+        {
+            ('A', o => o.Alignment, (o, v) => o.Alignment = v),
+            ('B', o => o.Tabs, (o, v) => o.Tabs = v),
+            ('C', o => o.Color, (o, v) => o.Color = v),
+            ('D', o => o.Fields, (o, v) => o.Fields = v),
+            ('F', o => o.Font, (o, v) => o.Font = v),
+            ('H', o => o.Height, (o, v) => o.Height = v),
+            ('L', o => o.LineFeed, (o, v) => o.LineFeed = v),
+            ('M', o => o.BackgroundMask, (o, v) => o.BackgroundMask = v),
+            ('N', o => o.Columns, (o, v) => o.Columns = v),
+            ('O', o => o.Overline, (o, v) => o.Overline = v),
+            ('P', o => o.Paragraph, (o, v) => o.Paragraph = v),
+            ('Q', o => o.Oblique, (o, v) => o.Oblique = v),
+            ('S', o => o.Stacking, (o, v) => o.Stacking = v),
+            ('T', o => o.Tracking, (o, v) => o.Tracking = v),
+            ('U', o => o.Underline, (o, v) => o.Underline = v),
+            ('W', o => o.Width, (o, v) => o.Width = v),
+            ('~', o => o.NonBreakingSpace, (o, v) => o.NonBreakingSpace = v),
+        };
+
         private StripTextOptions _options;
+
+        public StripTextViewModel()
+        {
+            _options = Load();
+            SelectAllCommand = new RelayCommand(_ => SetAll(true));
+            ClearAllCommand = new RelayCommand(_ => SetAll(false));
+            OkCommand = new RelayCommand(_ => Close(true));
+            CancelCommand = new RelayCommand(_ => Close(false));
+        }
 
         public StripTextOptions Options
         {
@@ -26,150 +60,56 @@ namespace BotPlusAutocadTool.ViewModels
         public ICommand CancelCommand { get; }
 
         public bool? DialogResult { get; private set; }
-        public System.Action CloseAction { get; set; }
-
-        public StripTextViewModel()
-        {
-            _options = LoadSettingsFromRegistry();
-
-            SelectAllCommand = new RelayCommand(param => SetAll(true));
-            ClearAllCommand = new RelayCommand(param => SetAll(false));
-            OkCommand = new RelayCommand(ExecuteOk);
-            CancelCommand = new RelayCommand(ExecuteCancel);
-        }
+        public Action CloseAction { get; set; }
 
         private void SetAll(bool value)
         {
-            // Обновляем все свойства модели и уведомляем View
-            Options.Alignment = value;
-            Options.Color = value;
-            Options.Font = value;
-            Options.Height = value;
-            Options.LineFeed = value;
-            Options.NonBreakingSpace = value;
-            Options.Oblique = value;
-            Options.Overline = value;
-            Options.Paragraph = value;
-            Options.Stacking = value;
-            Options.Tabs = value;
-            Options.Tracking = value;
-            Options.Underline = value;
-            Options.Width = value;
-            Options.BackgroundMask = value;
-            Options.Fields = value;
-            Options.Columns = value;
-
-            // Трюк для обновления UI, так как Options - это тот же объект, 
-            // но его поля изменились. Проще всего переприсвоить или вызвать OnPropertyChanged для всех.
-            // Для простоты в WPF можно сделать так:
-            var temp = Options;
+            foreach (var flag in Flags) flag.Set(Options, value);
+            // The options model does not raise change notifications; rebinding re-reads every check box.
+            var current = _options;
             Options = null;
-            Options = temp;
+            Options = current;
         }
 
-        private void ExecuteOk(object param)
+        private void Close(bool accepted)
         {
-            if (Options.RememberSettings)
-            {
-                SaveSettingsToRegistry();
-            }
-            DialogResult = true;
+            if (accepted && Options.RememberSettings) Save(Options);
+            DialogResult = accepted;
             CloseAction?.Invoke();
         }
 
-        private void ExecuteCancel(object param)
+        private static StripTextOptions Load()
         {
-            DialogResult = false;
-            CloseAction?.Invoke();
-        }
-
-        // --- Registry Logic (Matching Lisp path HKEY_CURRENT_USER\SOFTWARE\StripMtext\) ---
-        private const string REG_KEY = @"Software\StripMtext";
-        private const string REG_VAL_SETTINGS = "Settings"; // Строка типа "ACF..."
-        private const string REG_VAL_SAVE = "Save";
-
-        private StripTextOptions LoadSettingsFromRegistry()
-        {
-            var opts = new StripTextOptions();
+            var options = new StripTextOptions();
             try
             {
-                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(REG_KEY))
+                using var key = Registry.CurrentUser.OpenSubKey(RegistryKey);
+                if (key == null) return options;
+                options.RememberSettings = string.Equals(key.GetValue(RememberValue)?.ToString(), "1", StringComparison.Ordinal);
+                if (options.RememberSettings && key.GetValue(FlagsValue) is string stored && stored.Length > 0)
                 {
-                    if (key != null)
-                    {
-                        object saveVal = key.GetValue(REG_VAL_SAVE);
-                        if (saveVal != null && saveVal.ToString() == "1")
-                        {
-                            opts.RememberSettings = true;
-                            string flags = key.GetValue(REG_VAL_SETTINGS) as string;
-                            if (!string.IsNullOrEmpty(flags))
-                            {
-                                // Парсим строку флагов как в Lisp (A, C, F...)
-                                opts.Alignment = flags.Contains("A");
-                                opts.Tabs = flags.Contains("B");
-                                opts.Color = flags.Contains("C");
-                                opts.Fields = flags.Contains("D");
-                                opts.Font = flags.Contains("F");
-                                opts.Height = flags.Contains("H");
-                                opts.LineFeed = flags.Contains("L");
-                                opts.BackgroundMask = flags.Contains("M");
-                                opts.Columns = flags.Contains("N");
-                                opts.Overline = flags.Contains("O");
-                                opts.Paragraph = flags.Contains("P");
-                                opts.Oblique = flags.Contains("Q");
-                                opts.Stacking = flags.Contains("S");
-                                opts.Tracking = flags.Contains("T");
-                                opts.Underline = flags.Contains("U");
-                                opts.Width = flags.Contains("W");
-                                opts.NonBreakingSpace = flags.Contains("~");
-                            }
-                        }
-                        else
-                        {
-                            opts.RememberSettings = false;
-                        }
-                    }
+                    foreach (var flag in Flags) flag.Set(options, stored.IndexOf(flag.Flag) >= 0);
                 }
             }
-            catch { /* Игнорируем ошибки доступа к реестру */ }
-            return opts;
+            catch (Exception ex) when (ex is System.Security.SecurityException || ex is UnauthorizedAccessException || ex is System.IO.IOException)
+            {
+                PluginLog.Error("Read StripMtext settings", ex);
+            }
+            return options;
         }
 
-        private void SaveSettingsToRegistry()
+        private static void Save(StripTextOptions options)
         {
             try
             {
-                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(REG_KEY))
-                {
-                    if (key != null)
-                    {
-                        key.SetValue(REG_VAL_SAVE, Options.RememberSettings ? "1" : "0");
-
-                        // Генерируем строку флагов
-                        string flags = "";
-                        if (Options.Alignment) flags += "A";
-                        if (Options.Tabs) flags += "B";
-                        if (Options.Color) flags += "C";
-                        if (Options.Fields) flags += "D";
-                        if (Options.Font) flags += "F";
-                        if (Options.Height) flags += "H";
-                        if (Options.LineFeed) flags += "L";
-                        if (Options.BackgroundMask) flags += "M";
-                        if (Options.Columns) flags += "N";
-                        if (Options.Overline) flags += "O";
-                        if (Options.Paragraph) flags += "P";
-                        if (Options.Oblique) flags += "Q";
-                        if (Options.Stacking) flags += "S";
-                        if (Options.Tracking) flags += "T";
-                        if (Options.Underline) flags += "U";
-                        if (Options.Width) flags += "W";
-                        if (Options.NonBreakingSpace) flags += "~";
-
-                        key.SetValue(REG_VAL_SETTINGS, flags);
-                    }
-                }
+                using var key = Registry.CurrentUser.CreateSubKey(RegistryKey);
+                key.SetValue(RememberValue, options.RememberSettings ? "1" : "0");
+                key.SetValue(FlagsValue, new string(Flags.Where(f => f.Get(options)).Select(f => f.Flag).ToArray()));
             }
-            catch { }
+            catch (Exception ex) when (ex is System.Security.SecurityException || ex is UnauthorizedAccessException || ex is System.IO.IOException)
+            {
+                PluginLog.Error("Save StripMtext settings", ex);
+            }
         }
     }
 }

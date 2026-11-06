@@ -1,9 +1,5 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using Microsoft.Win32;
 
 namespace BotPlusAutocadTool.Models
@@ -15,7 +11,7 @@ namespace BotPlusAutocadTool.Models
     {
         #region Constants
 
-        private const string RegistryPath = @"Software\WEAM\AutoNum";
+        private const string RegistryPath = @"Software\BotPlus\BotPlusAutocadTool\AutoNum";
 
         #endregion
 

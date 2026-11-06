@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// See LICENSE in the repository root.
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
-// ============================================================================
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 
 using System;
 using System.Globalization;

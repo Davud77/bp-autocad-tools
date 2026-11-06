@@ -1,22 +1,17 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. 
-// Author: OOXGN | Project: BotPlusAutocadTool
-// ============================================================================
-
-// File: Services/BlockExportStage1Service.cs
-
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.PlottingServices;
-using Autodesk.AutoCAD.Runtime;
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.PlottingServices;
+using Autodesk.AutoCAD.Runtime;
 using BotPlusAutocadTool.Models;
 
 namespace BotPlusAutocadTool.Services
@@ -104,13 +99,17 @@ namespace BotPlusAutocadTool.Services
                 foreach (var item in printItems)
                 {
                     string formatName = item.Format ?? "Unknown";
-                    string setupName = $"WEAM_Sheet{sheetIndex}_{SanitizeFileName(formatName)}";
+                    string setupName = $"BOTPLUS_Sheet{sheetIndex}_{SanitizeFileName(formatName)}";
 
                     // cacheKey включает координаты окна/контекст
                     string cacheKey =
                         $"{formatName}_{item.BlockId.Handle.Value}_{item.Extents.MinPoint.X:F3}_{item.Extents.MinPoint.Y:F3}_{item.Extents.MaxPoint.X:F3}_{item.Extents.MaxPoint.Y:F3}";
 
-                    if (!pageSetupCache.ContainsKey(cacheKey))
+                    if (pageSetupCache.TryGetValue(cacheKey, out var cachedSetup))
+                    {
+                        setupName = cachedSetup;
+                    }
+                    else
                     {
                         PlotSettings ps;
 
@@ -132,10 +131,6 @@ namespace BotPlusAutocadTool.Services
 
                         ApplyPlotSettingsForItem(ps, item, ed, tr, mediaOptions, transparency, drawingUnits, plotStyle);
                         pageSetupCache[cacheKey] = setupName;
-                    }
-                    else
-                    {
-                        setupName = pageSetupCache[cacheKey];
                     }
 
                     // Уникальное имя листа для DSD

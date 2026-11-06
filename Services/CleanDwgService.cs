@@ -1,16 +1,12 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BotPlusAutocadTool.Models;
 
 namespace BotPlusAutocadTool.Services
@@ -181,8 +177,8 @@ namespace BotPlusAutocadTool.Services
             foreach (ObjectId id in rat)
             {
                 RegAppTableRecord regApp = (RegAppTableRecord)_tr.GetObject(id, OpenMode.ForRead);
-                string name = regApp.Name.ToUpper();
-                if (name == "ACAD" || name.StartsWith("ACAD_")) continue;
+                string name = regApp.Name;
+                if (name.Equals("ACAD", StringComparison.OrdinalIgnoreCase) || name.StartsWith("ACAD_", StringComparison.OrdinalIgnoreCase)) continue;
 
                 try
                 {
@@ -225,8 +221,8 @@ namespace BotPlusAutocadTool.Services
             {
                 foreach (var entry in nod)
                 {
-                    string name = entry.Key.ToUpper();
-                    if (name.StartsWith("ACAD_") || name.StartsWith("ACDB")) continue;
+                    string name = entry.Key;
+                    if (name.StartsWith("ACAD_", StringComparison.OrdinalIgnoreCase) || name.StartsWith("ACDB", StringComparison.OrdinalIgnoreCase)) continue;
 
                     try
                     {
@@ -256,11 +252,10 @@ namespace BotPlusAutocadTool.Services
                         // История Solid (3DSolid History)
                         if (_options.SolidHistory && ent is Solid3d solid)
                         {
-                            // ИСПРАВЛЕНИЕ: HistoryRep не существует. Используем RecordHistory.
                             if (solid.RecordHistory)
                             {
                                 solid.UpgradeOpen();
-                                solid.RecordHistory = false; // Отключаем запись истории
+                                solid.RecordHistory = false;
                                 histDel++;
                             }
                         }

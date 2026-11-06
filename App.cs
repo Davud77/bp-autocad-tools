@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -15,7 +16,7 @@ namespace BotPlusAutocadTool
     /// <summary>
     /// Startup tasks run once on the first Idle, then the Idle handler is removed.
     /// The interface is checked again only on events: workspace switch (WSCURRENT), commands that
-    /// reload menus or the ribbon, a new ribbon instance, and a change of the classic UI setting.
+    /// reload menus or the ribbon, a new ribbon instance, a theme change (COLORTHEME) and a change of the classic UI setting.
     /// </summary>
     public sealed class App : IExtensionApplication
     {
@@ -123,7 +124,9 @@ namespace BotPlusAutocadTool
 
         private void OnSystemVariableChanged(object sender, Autodesk.AutoCAD.ApplicationServices.SystemVariableChangedEventArgs args)
         {
-            if (string.Equals(args.Name, "WSCURRENT", StringComparison.OrdinalIgnoreCase)) RequestUi();
+            // COLORTHEME switches the icon set; WSCURRENT may rebuild menus or the ribbon.
+            if (string.Equals(args.Name, "WSCURRENT", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(args.Name, "COLORTHEME", StringComparison.OrdinalIgnoreCase)) RequestUi();
         }
 
         private void OnCommandEnded(object sender, CommandEventArgs args)
@@ -192,6 +195,7 @@ namespace BotPlusAutocadTool
                 {
                     _ribbon.RemoveIfPresent();
                     _classic.EnsureCreated();
+                    _classic.ApplyTheme();
                     return true;
                 }
                 _classic.RemoveIfPresent();

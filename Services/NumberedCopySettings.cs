@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright (c) 2026 OOXGN. See LICENSE in the repository root.
-using BotPlusAutocadTool.Models;
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System.Globalization;
+using BotPlusAutocadTool.Models;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -10,7 +10,7 @@ namespace BotPlusAutocadTool.Services
 {
     internal static class NumberedCopySettings
     {
-        private const string Key = @"Software\OOXGN\BotPlusAutocadTool\NumberedCopy";
+        private const string Key = @"Software\BotPlus\BotPlusAutocadTool\NumberedCopy";
         public static NumberedCopyOptions Load()
         {
             try

@@ -1,8 +1,4 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-only; see LICENSE in the repository root. -->
-<!-- ========================================================================
-     OOXGN - Copyright (c) 2026. All rights reserved.
-     Author: OOXGN | Project: BotPlusAutocadTool
-     ======================================================================== -->
 <!-- File: BotPlusAutocadTool/Views/StampWindow.xaml -->
 <Window x:Class="BotPlusAutocadTool.Views.StampWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"

@@ -1,28 +1,21 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
-// ============================================================================
-
-// File: ViewModels/BatchPlotViewModel.cs
-
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using BotPlusAutocadTool.Models;
-using BotPlusAutocadTool.Services;
-
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.PlottingServices; // NEW: PlotFactory.ProcessPlotState
+using Autodesk.AutoCAD.Runtime;
+using BotPlusAutocadTool.Models;
+using BotPlusAutocadTool.Services;
 using AcadCoreApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
-
 using SystemException = System.Exception;
 
 namespace BotPlusAutocadTool.ViewModels

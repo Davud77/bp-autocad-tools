@@ -1,9 +1,5 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using Autodesk.AutoCAD.Geometry;
 
@@ -75,10 +71,7 @@ namespace BotPlusAutocadTool.Services
             double alpha = CalculateAlpha(numeratorA, cosBeta, sinBeta, k, x1);
             double alpha1 = CalculateAlpha1(numeratorA, cosBeta, cosBeta1, sinBeta1, k, x1);
 
-            // --- ИСПРАВЛЕНИЕ: Убрана жесткая проверка (Throw), добавлен безопасный расчет ---
-            // Lisp просто делит. Если знаменатель 0, Lisp падает. 
-            // Мы делаем безопасное деление: если угол совпал с осью, берем прямое отношение длин.
-
+            // Если угол совпадает с осью, масштаб берётся как прямое отношение длин (исходный LISP здесь делил на ноль).
             double scaleY = SolveScale(distT1T2, Math.Sin(alpha1), distS1S2, Math.Sin(alpha));
             double scaleX = SolveScale(distT1T2, Math.Cos(alpha1), distS1S2, Math.Cos(alpha));
 

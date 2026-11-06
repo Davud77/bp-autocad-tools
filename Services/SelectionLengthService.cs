@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -6,6 +7,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Windows;
+using BotPlusAutocadTool.Infrastructure;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using Forms = System.Windows.Forms;
 
@@ -280,8 +282,8 @@ namespace BotPlusAutocadTool.Services
             }
             // Same mechanism as the supplied LISP when native panes are unavailable (no mouse: always on).
             if (!_listening) { RestoreMacro(); return; }
-            if (_previousMacro == null) _previousMacro = Convert.ToString(AcadApp.GetSystemVariable("MODEMACRO"));
-            var current = Convert.ToString(AcadApp.GetSystemVariable("MODEMACRO"));
+            if (_previousMacro == null) _previousMacro = SystemVariables.GetString("MODEMACRO");
+            var current = SystemVariables.GetString("MODEMACRO");
             if (_ownedMacro == null || current == _ownedMacro)
             {
                 _ownedMacro = _total > 0 ? Prefix + FormatTotal() : _previousMacro;
@@ -291,7 +293,7 @@ namespace BotPlusAutocadTool.Services
 
         private static void RestoreMacro()
         {
-            if (_previousMacro != null && Convert.ToString(AcadApp.GetSystemVariable("MODEMACRO")) == _ownedMacro)
+            if (_previousMacro != null && SystemVariables.GetString("MODEMACRO") == _ownedMacro)
                 AcadApp.SetSystemVariable("MODEMACRO", _previousMacro);
             _previousMacro = _ownedMacro = null;
         }

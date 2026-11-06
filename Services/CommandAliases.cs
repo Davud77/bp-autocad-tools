@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright (c) 2026 OOXGN. See LICENSE in the repository root.
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -57,7 +57,8 @@ namespace BotPlusAutocadTool.Services
             if (starts.Count == 1)
             {
                 int length = ends[0].Index + ends[0].Length - starts[0].Index;
-                if (_text.Substring(starts[0].Index + length).StartsWith("\n")) length++;
+                int next = starts[0].Index + length;
+                if (next < _text.Length && _text[next] == '\n') length++;
                 managed = _text.Substring(starts[0].Index, length);
                 _outside = _text.Remove(starts[0].Index, length);
             }
@@ -93,7 +94,7 @@ namespace BotPlusAutocadTool.Services
                 if (names.Contains(alias)) throw new InvalidOperationException("«" + alias + "» — полное имя команды.");
                 if (_occupied.TryGetValue(alias, out var target))
                     throw new InvalidOperationException("«" + alias + "» уже занято в PGP: " + target);
-                if (_occupied.Values.Any(v => v.StartsWith("*") && string.Equals(v.Substring(1).TrimStart('_', '.'), alias, StringComparison.OrdinalIgnoreCase)))
+                if (_occupied.Values.Any(v => v.StartsWith('*') && string.Equals(v.Substring(1).TrimStart('_', '.'), alias, StringComparison.OrdinalIgnoreCase)))
                     throw new InvalidOperationException("«" + alias + "» совпадает с именем команды из PGP.");
                 if (!used.Add(alias)) throw new InvalidOperationException("Сокращение «" + alias + "» назначено несколько раз.");
                 entries.Add(alias.ToUpperInvariant() + ", *" + row.Command.English);
@@ -101,7 +102,7 @@ namespace BotPlusAutocadTool.Services
             string text = _outside;
             if (entries.Count > 0)
             {
-                if (text.Length > 0 && !text.EndsWith("\n")) text += _newline;
+                if (text.Length > 0 && !text.EndsWith('\n')) text += _newline;
                 text += Begin + _newline + string.Join(_newline, entries) + _newline + End + _newline;
             }
             return text;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-// Copyright (c) 2026 OOXGN. See LICENSE in the repository root.
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace BotPlusAutocadTool.Services
 
     public static class CommandCatalog
     {
-        public static readonly string[] LegacyNames = { "Align_Den", "AUTONUM", "НУМ", "WSELECT", "SUMLENGTH", "MULTICOPY", "PLANPREP", "CLEANDWG", "CLEANUNSELECTED", "STRIPTEXT", "WEAM_STAMP", "WEAM_BATCHPLOT", "WPLOT", "WEAM_CUSTOMERORDER", "WEAM_TABLEEXCEL", "WEAM_INFO", "BOTPLUS_CHECKUPDATES", "BOTPLUS_INSERTFORMAT", "BOTPLUS_SETTINGS", "BOTPLUS_CLASSIC", "BOTPLUS_ADDITIONAL", "BOTPLUS_EXPORTEXCEL", "BOTPLUS_IMPORTEXCEL", "BOTPLUS_CLEARTABLESTYLE" };
+        public static readonly string[] LegacyNames = { "AUTONUM", "НУМ", "WSELECT", "SUMLENGTH", "MULTICOPY", "PLANPREP", "CLEANDWG", "CLEANUNSELECTED", "STRIPTEXT", "WPLOT", "BOTPLUS_CHECKUPDATES", "BOTPLUS_INSERTFORMAT", "BOTPLUS_SETTINGS", "BOTPLUS_CLASSIC", "BOTPLUS_ADDITIONAL", "BOTPLUS_EXPORTEXCEL", "BOTPLUS_IMPORTEXCEL", "BOTPLUS_CLEARTABLESTYLE" };
         public static IReadOnlyList<CommandDefinition> All { get; } = Array.AsReadOnly(new[]
         {
             new CommandDefinition("ATISO", "АТАКСО", "Аксонометрия", "АКС"),

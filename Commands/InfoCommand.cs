@@ -1,9 +1,5 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
 using Autodesk.AutoCAD.Runtime;
 using BotPlusAutocadTool.Views;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
@@ -14,7 +10,6 @@ namespace BotPlusAutocadTool.Commands
     {
         [CommandMethod("ATINFO")]
         [CommandMethod("АТИНФО")]
-        [CommandMethod("WEAM_INFO")]
         public void Execute()
         {
             var window = new AboutWindow();

@@ -1,12 +1,8 @@
-// ============================================================================
-// OOXGN - Copyright (c) 2026. All rights reserved.
-// Author: OOXGN | Project: BotPlusAutocadTool
 // SPDX-License-Identifier: AGPL-3.0-only
-// ============================================================================
-
+// Copyright (c) 2026 BotPlus. See LICENSE in the repository root.
+using System;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using BotPlusAutocadTool.Models;
 
 namespace BotPlusAutocadTool.Services
@@ -42,7 +38,7 @@ namespace BotPlusAutocadTool.Services
             }
         }
 
-        // НОВОЕ: поиск поля в контенте ячейки таблицы (замена устаревшего Table.GetFieldId)
+        // поиск поля в контенте ячейки таблицы (замена устаревшего Table.GetFieldId)
         private static bool TryGetFirstFieldContentIndex(Cell cell, out int contentIndex)
         {
             contentIndex = -1;

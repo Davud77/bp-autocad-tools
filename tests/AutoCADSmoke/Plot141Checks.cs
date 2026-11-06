@@ -47,9 +47,9 @@ public sealed class Plot141Checks
                     var model = (Layout)tr.GetObject(LayoutManager.Current.GetLayoutId("Model"), OpenMode.ForWrite);
                     PlotSettingsValidator.Current.SetPlotPaperUnits(model, PlotPaperUnit.Inches);
                     var dict = (DBDictionary)tr.GetObject(doc.Database.PlotSettingsDictionaryId, OpenMode.ForRead);
-                    if (dict.Contains("WEAM_Sheet1_A2"))
+                    if (dict.Contains("BOTPLUS_Sheet1_A2"))
                         PlotSettingsValidator.Current.SetPlotPaperUnits(
-                            (PlotSettings)tr.GetObject(dict.GetAt("WEAM_Sheet1_A2"), OpenMode.ForWrite), PlotPaperUnit.Inches);
+                            (PlotSettings)tr.GetObject(dict.GetAt("BOTPLUS_Sheet1_A2"), OpenMode.ForWrite), PlotPaperUnit.Inches);
                     tr.Commit();
                 }
                 if (!BlockExportStage1Service.Run(doc, dsd, new List<BatchPlotItem> { item }, pdf, transparency)) throw new InvalidOperationException("Preparation failed");

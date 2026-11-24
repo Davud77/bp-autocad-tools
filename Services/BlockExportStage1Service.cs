@@ -230,7 +230,7 @@ namespace BotPlusAutocadTool.Services
                 string media = mediaOptions.Where(m => m.Width + 0.01 >= item.PlotWidthMm && m.Height + 0.01 >= item.PlotHeightMm)
                     .OrderBy(m => m.Width * m.Height).Select(m => m.Name).FirstOrDefault();
                 if (media == null)
-                    throw new InvalidOperationException($"Нет бумаги для рамки {item.PlotWidthMm:F2}×{item.PlotHeightMm:F2} мм.");
+                    throw new InvalidOperationException($"Для рамки {item.PlotWidthMm:F2} × {item.PlotHeightMm:F2} мм при масштабе 1:{item.PlotScale} нет подходящего формата PDF. Выберите больший знаменатель масштаба или проверьте единицы DWG.");
                 psv.SetCanonicalMediaName(ps, media);
                 // Selecting media can restore inches inherited from the drawing's page setup.
                 // Set units after media, before applying the millimeter-based print scale.
@@ -249,7 +249,7 @@ namespace BotPlusAutocadTool.Services
             catch (System.Exception ex)
             {
                 ed.WriteMessage($"\n[BotPlus AT] Лист {item.SheetNumber}: {ex.Message}\n");
-                throw new InvalidOperationException($"Не удалось подготовить настройки печати листа {item.SheetNumber}.", ex);
+                throw new InvalidOperationException($"Не удалось подготовить настройки печати листа {item.SheetNumber}.\n{ex.Message}", ex);
             }
         }
 

@@ -18,7 +18,11 @@ namespace BotPlusAutocadTool.Views
     {
         public sealed class EditableSettings : PluginSettings
         {
-            public int PlotScaleIndex { get => PlotScale == 100 ? 1 : 0; set => PlotScale = value == 1 ? 100 : 1; }
+            public int PlotScaleIndex
+            {
+                get => PlotScale switch { 100 => 1, 1000 => 2, _ => 0 };
+                set { if (value >= 0 && value <= 2) PlotScale = value switch { 1 => 100, 2 => 1000, _ => 1 }; }
+            }
         }
         private bool _loading;
         private static AboutWindow _active;

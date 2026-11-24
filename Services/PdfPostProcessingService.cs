@@ -7,10 +7,8 @@ using Autodesk.AutoCAD.EditorInput;
 using BotPlusAutocadTool.Models;
 // aliases (должны быть тут, до namespace)
 using IOPath = System.IO.Path;
-using ITextPdfAction = iText.Kernel.Pdf.Action.PdfAction;
-using ITextPdfArray = iText.Kernel.Pdf.PdfArray;
 using ITextPdfDocument = iText.Kernel.Pdf.PdfDocument;
-using ITextPdfLinkAnnotation = iText.Kernel.Pdf.Annot.PdfLinkAnnotation;
+using ITextPdfName = iText.Kernel.Pdf.PdfName;
 using ITextPdfPage = iText.Kernel.Pdf.PdfPage;
 using ITextPdfReader = iText.Kernel.Pdf.PdfReader;
 using ITextPdfWriter = iText.Kernel.Pdf.PdfWriter;
@@ -21,12 +19,9 @@ namespace BotPlusAutocadTool.Services
     /// <summary>
     /// Постобработка многостраничного PDF (iText7):
     /// - Размер видимой и физической страницы по окну рамки, от начала печати (0,0).
-    /// - Добавление гиперссылки на весь лист.
     /// </summary>
     public static class PdfPostProcessingService
     {
-        private const string HomePageUrl = "https://github.com/Davud77/bp-autocad-tools";
-
         /// <summary>
         /// Важно: itemsInDsdOrder должен быть в том же порядке, что и страницы в итоговом PDF.
         /// </summary>
@@ -69,8 +64,9 @@ namespace BotPlusAutocadTool.Services
                             TryCropPageToFormat(page, item);
                         }
 
-                        // 2) Гиперссылка на весь лист
-                        AddFullPageLink(page, HomePageUrl);
+                        foreach (var annotation in page.GetAnnotations())
+                            if (ITextPdfName.Link.Equals(annotation.GetSubtype()))
+                                page.RemoveAnnotation(annotation);
                     }
                 }
 
@@ -128,27 +124,6 @@ namespace BotPlusAutocadTool.Services
             page.SetTrimBox(bounds);
             page.SetBleedBox(bounds);
             page.SetArtBox(bounds);
-        }
-
-        /// <summary>
-        /// Добавляет гиперссылку на всю видимую область (CropBox/MediaBox).
-        /// </summary>
-        private static void AddFullPageLink(ITextPdfPage page, string linkUrl)
-        {
-            ITextRect box = page.GetCropBox();
-            if (box == null || box.GetWidth() <= 0 || box.GetHeight() <= 0)
-                box = page.GetMediaBox();
-
-            var linkAnnot = new ITextPdfLinkAnnotation(
-                new ITextRect(box.GetLeft(), box.GetBottom(), box.GetWidth(), box.GetHeight())
-            );
-
-            linkAnnot.SetAction(ITextPdfAction.CreateURI(linkUrl));
-
-            // скрыть рамку
-            linkAnnot.SetBorder(new ITextPdfArray(new int[] { 0, 0, 0 }));
-
-            page.AddAnnotation(linkAnnot);
         }
 
         public static void CombinePages(IReadOnlyList<string> sourcePaths, string destination)

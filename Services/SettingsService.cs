@@ -117,7 +117,7 @@ namespace BotPlusAutocadTool.Services
             if (LengthUnit < 0 || LengthUnit > 2) LengthUnit = 0;
             if (AreaUnit < 0 || AreaUnit > 2) AreaUnit = 0;
             if (!double.IsFinite(FrameInsertionScale) || FrameInsertionScale <= 0 || FrameInsertionScale > 1000000) FrameInsertionScale = 100;
-            if (PlotScale != 1 && PlotScale != 100) PlotScale = 100;
+            if (PlotScale != 1 && PlotScale != 100 && PlotScale != 1000) PlotScale = 100;
             PlotOutputDirectory ??= "";
             PdfPlotterInstalls ??= new();
         }

@@ -14,6 +14,7 @@ namespace BotPlusAutocadTool.Services
     public static class PdfPlotterService
     {
         public const string PlotterName = "BotPlus PDF.pc3";
+        private const int ConfigurationRevision = 2;
 
         // Resolve the active profile at runtime, including other languages, custom
         // printer search paths, new users and isolated Core Console profiles.
@@ -47,7 +48,7 @@ namespace BotPlusAutocadTool.Services
                 try { dynamic host = AcadApp.AcadApplication; searchPath = (string)host.Preferences.Files.PrinterConfigPath ?? ""; }
                 catch { searchPath = ""; }
             }
-            return version + "|" + roaming + "|" + searchPath;
+            return version + "|" + ConfigurationRevision + "|" + roaming + "|" + searchPath;
         }
 
         private static bool Installed(string stored, string environment, out string configPath)

@@ -74,7 +74,7 @@
                 <Grid IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="76"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="210"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="34"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Масштаб" Margin="0,0,6,0"/>
-                    <ComboBox Grid.Column="1" SelectedIndex="{Binding PlotScaleIndex}"><ComboBoxItem Content="1:1"/><ComboBoxItem Content="1:100"/></ComboBox>
+                    <ComboBox Grid.Column="1" SelectedIndex="{Binding PlotScaleIndex}"><ComboBoxItem Content="1:1"/><ComboBoxItem Content="1:100"/><ComboBoxItem Content="1:1000"/></ComboBox>
                     <TextBlock Grid.Column="2" Text="{Binding PlotStyleLabel}" Margin="12,0,6,0"/>
                     <ComboBox x:Name="PlotStyleSelector" Grid.Column="3" ItemsSource="{Binding PlotStyleChoices}" SelectedItem="{Binding SelectedPlotStyle}" ToolTip="Таблица стилей печати этого AutoCAD. Из DWG — настройки модели; без стиля — исходные цвета объектов." ClipToBounds="True"/>
                     <TextBlock Grid.Column="4" Text="Папка PDF" Margin="12,0,6,0"/>

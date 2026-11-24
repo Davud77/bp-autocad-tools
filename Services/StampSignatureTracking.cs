@@ -152,7 +152,12 @@ namespace BotPlusAutocadTool.Services
             try
             {
                 string command = args.GlobalCommandName ?? "";
-                if (UndoCommands.Contains(command)) { state.Dirty = false; return; }
+                if (UndoCommands.Contains(command))
+                {
+                    state.Dirty = false;
+                    Pending.Remove(document);
+                    return;
+                }
                 if (!state.DatabaseHooked)
                 {
                     // A frame can arrive by INSERT, paste or DesignCenter: one cheap block table lookup.
@@ -219,15 +224,15 @@ namespace BotPlusAutocadTool.Services
             try { source = StampTextLayoutService.SourceState(database); }
             catch (Exception ex) { Infrastructure.PluginLog.Error("Stamp source state", ex); return; }
             bool sourceChanged = state.SourceState != source;
-            // Cheap check: nothing changed since the previous update.
-            if (!state.Dirty && !sourceChanged) return;
+            // REGEN and saving also repair stale attribute references already stored in a DWG.
+            bool synchronizeSignatures = state.Dirty || sourceChanged;
             state.Dirty = false;
             _updating = true;
             try
             {
                 using (document.LockDocument())
                 {
-                    StampSignatureDwgService.Synchronize(database);
+                    if (synchronizeSignatures) StampSignatureDwgService.Synchronize(database);
                     StampTextLayoutService.Apply(database, evaluateAllFields: sourceChanged);
                     if (sourceChanged && allowRegen) document.Editor.Regen();
                 }

@@ -70,9 +70,9 @@ public sealed class PlotChecks
             var sheets = Path.Combine(directory, "sheets-" + scale);
             PdfPostProcessingService.DeliverPdf(pdf, sheets, selected, true);
             if (Directory.GetFiles(sheets, "*.pdf").Length != 2) throw new InvalidOperationException("Sheet output failed");
-            document.Editor.WriteMessage("\nPLOT_SCALE_PASS: 1:" + scale + " detected A3, exact print scale, native PDF, crop/link, two sheets\n");
+            document.Editor.WriteMessage("\nPLOT_SCALE_PASS: 1:" + scale + " detected A3, exact print scale, native PDF, crop, two sheets\n");
             }
-            document.Editor.WriteMessage("\nBOTPLUS_PLOT_PASS: native PDF driver 1:1 and 1:100, DSD, WM_FORMAT, crop/link, separate sheet; " + directory + "\n");
+            document.Editor.WriteMessage("\nBOTPLUS_PLOT_PASS: native PDF driver 1:1 and 1:100, DSD, WM_FORMAT, crop, separate sheet; " + directory + "\n");
         }
         catch (System.Exception ex) { document.Editor.WriteMessage("\nBOTPLUS_PLOT_FAIL: " + ex + "\n"); }
         finally

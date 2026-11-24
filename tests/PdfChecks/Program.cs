@@ -1,6 +1,8 @@
 using BotPlusAutocadTool.Models;
 using BotPlusAutocadTool.Services;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Action;
+using iText.Kernel.Pdf.Annot;
 using iText.Kernel.Geom;
 using System.Security.Cryptography;
 
@@ -9,7 +11,8 @@ Directory.CreateDirectory(directory);
 var sourcePath = System.IO.Path.Combine(directory, "source.pdf");
 using (var document = new PdfDocument(new PdfWriter(sourcePath)))
 {
-    document.AddNewPage(new PageSize(1200, 1000));
+    document.AddNewPage(new PageSize(1200, 1000))
+        .AddAnnotation(new PdfLinkAnnotation(new Rectangle(20, 20, 100, 10)).SetAction(PdfAction.CreateURI("https://example.com")));
     document.AddNewPage(new PageSize(1000, 1200));
 }
 var items = new List<BatchPlotItem>
@@ -26,20 +29,14 @@ using (var document = new PdfDocument(new PdfReader(sourcePath)))
     Assert(Math.Abs(portrait.GetWidth() - 210 * 72.0 / 25.4) < 0.01, "Portrait width");
     Assert(Math.Abs(portrait.GetHeight() - 297 * 72.0 / 25.4) < 0.01, "Portrait height");
     for (int i = 1; i <= 2; i++)
-    {
-        var annotations = document.GetPage(i).GetAnnotations();
-        Assert(annotations.Count == 1, "Missing sheet link");
-        var action = annotations[0].GetPdfObject().GetAsDictionary(PdfName.A);
-        Assert(action.GetAsString(PdfName.URI).ToUnicodeString() == "https://github.com/Davud77/bp-autocad-tools", "Sheet link must point exactly to the home page");
-    }
+        Assert(document.GetPage(i).GetAnnotations().Count == 0, "Processed sheet contains a link");
 }
 var binder = System.IO.Path.Combine(directory, "binder.pdf");
 PdfPostProcessingService.DeliverPdf(sourcePath, binder, items, false);
 using (var document = new PdfDocument(new PdfReader(binder)))
 {
     for (int i = 1; i <= document.GetNumberOfPages(); i++)
-        Assert(document.GetPage(i).GetAnnotations().Single().GetPdfObject().GetAsDictionary(PdfName.A)
-            .GetAsString(PdfName.URI).ToUnicodeString() == "https://github.com/Davud77/bp-autocad-tools", "Binder link changed");
+        Assert(document.GetPage(i).GetAnnotations().Count == 0, "Binder sheet contains a link");
 }
 var sheets = System.IO.Path.Combine(directory, "sheets");
 PdfPostProcessingService.DeliverPdf(sourcePath, sheets, items, true);
@@ -47,9 +44,7 @@ Assert(Directory.GetFiles(sheets, "*.pdf").Length == 2, "Duplicate sheet number 
 foreach (var file in Directory.GetFiles(sheets, "*.pdf"))
 {
     using var document = new PdfDocument(new PdfReader(file));
-    Assert(document.GetNumberOfPages() == 1 && document.GetPage(1).GetAnnotations().Count == 1, "Single sheet or annotation lost");
-    Assert(document.GetPage(1).GetAnnotations().Single().GetPdfObject().GetAsDictionary(PdfName.A)
-        .GetAsString(PdfName.URI).ToUnicodeString() == "https://github.com/Davud77/bp-autocad-tools", "Individual sheet link changed");
+    Assert(document.GetNumberOfPages() == 1 && document.GetPage(1).GetAnnotations().Count == 0, "Invalid individual sheet or unexpected link");
 }
 var originalHash = SHA256.HashData(File.ReadAllBytes(sourcePath));
 var combined = System.IO.Path.Combine(directory, "combined.pdf");
@@ -59,7 +54,7 @@ using (var document = new PdfDocument(new PdfReader(combined)))
 {
     Assert(document.GetNumberOfPages() == 2, "Combined page count");
     Assert(document.GetPage(1).GetCropBox().GetHeight() > document.GetPage(1).GetCropBox().GetWidth(), "Combined sheet order changed");
-    Assert(document.GetPage(2).GetAnnotations().Count == 1, "Combination lost annotation");
+    Assert(document.GetPage(2).GetAnnotations().Count == 0, "Combined sheet contains a link");
 }
 var combinedHash = SHA256.HashData(File.ReadAllBytes(combined));
 try { PdfPostProcessingService.CombinePages(new[] { sourcePath }, combined); throw new Exception("Multi-page intermediate accepted"); }
@@ -68,7 +63,7 @@ Assert(combinedHash.SequenceEqual(SHA256.HashData(File.ReadAllBytes(combined))),
 Assert(!PdfPostProcessingService.ProcessPdf(sourcePath, items.Take(1).ToArray(), null), "Page-count mismatch was accepted");
 Assert(originalHash.SequenceEqual(SHA256.HashData(File.ReadAllBytes(sourcePath))), "Failed processing changed source PDF");
 PdfPostProcessingService.DeliverPdf(sourcePath, binder, items, false);
-Console.WriteLine("PASS: landscape/portrait crop, sheet links, binder, individual sheets, duplicate numbers, mismatch preserves original, overwrite.");
+Console.WriteLine("PASS: landscape/portrait crop, removal of sheet links, binder, individual sheets, duplicate numbers, mismatch preserves original, overwrite.");
 var binderHash = SHA256.HashData(File.ReadAllBytes(binder));
 var second = PdfPostProcessingService.DeliverPdf(sourcePath, binder, items, false, true).Single();
 var third = PdfPostProcessingService.DeliverPdf(sourcePath, binder, items, false, true).Single();

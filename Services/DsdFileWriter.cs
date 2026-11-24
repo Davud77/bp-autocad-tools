@@ -65,7 +65,7 @@ namespace BotPlusAutocadTool.Services
                     else if (lines[line].StartsWith("OUT=", StringComparison.Ordinal)) lines[line] = "OUT=" + Path.GetDirectoryName(Path.GetFullPath(pdf));
                 }
                 File.WriteAllLines(temporary, lines, Encoding.Unicode);
-                File.AppendAllText(temporary, "[PdfOptions]\nIncludeHyperlinks=TRUE\nCreateBookmarks=TRUE\nCaptureFontsInDrawing=TRUE\nConvertTextToGeometry=FALSE\nVectorResolution=600\nRasterResolution=400\n", Encoding.Unicode);
+                File.AppendAllText(temporary, "[PdfOptions]\nIncludeHyperlinks=FALSE\nCreateBookmarks=TRUE\nCaptureFontsInDrawing=TRUE\nConvertTextToGeometry=FALSE\nVectorResolution=600\nRasterResolution=400\n", Encoding.Unicode);
                 using (var verify = new DsdData())
                 {
                     verify.ReadDsd(temporary);

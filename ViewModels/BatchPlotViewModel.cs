@@ -198,10 +198,11 @@ namespace BotPlusAutocadTool.ViewModels
         }
         public int PlotScaleIndex
         {
-            get => _service.PlotScale == 100 ? 1 : 0;
+            get => _service.PlotScale switch { 100 => 1, 1000 => 2, _ => 0 };
             set
             {
-                int scale = value == 1 ? 100 : 1;
+                if (value < 0 || value > 2) return;
+                int scale = value switch { 1 => 100, 2 => 1000, _ => 1 };
                 if (_service.PlotScale == scale) return;
                 _service.PlotScale = scale;
                 SettingsService.Settings.PlotScale = scale;
